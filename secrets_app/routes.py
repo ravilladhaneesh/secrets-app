@@ -1,33 +1,6 @@
-from flask import Flask, render_template, url_for, request, redirect, flash
-from flask_sqlalchemy import SQLAlchemy
-from forms import UserRegistrationForm, UserLoginForm
-
-
-app = Flask(__name__)
-app.config['SECRET_KEY'] = "aaaaa"
-app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///site.db"
-db = SQLAlchemy(app)
-
-
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    firstName = db.Column(db.String(20), nullable=False)
-    lastName = db.Column(db.String(30), nullable=True)
-    email = db.Column(db.String(60), nullable=False, unique=True)
-    password = db.Column(db.String(60), nullable=False)
-    key = db.Column(db.String(60), nullable=True)
-    secrets = db.relationship('Secret', backref='user', lazy=True)
-
-    def __repr__(self):
-        return f"User('{self.firstName}, {self.lastName}, {self.email}')"
-
-
-class Secret(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    fieldName = db.Column(db.String(100), nullable=False)
-    fieldSecret = db.Column(db.String(100), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
+from flask import render_template, url_for, request, redirect, flash
+from secrets_app.forms import UserLoginForm, UserRegistrationForm
+from secrets_app import app
 
 @app.route("/")
 def home():
@@ -64,8 +37,3 @@ def login():
 @app.route("/nominees")
 def nominees():
     return render_template("nominee.html", title='nominee')
-
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
