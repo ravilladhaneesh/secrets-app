@@ -18,9 +18,9 @@ class UserRegistrationForm(FlaskForm):
     
     def validate_password(self, password):
         special_char = ["@", "$", "%", "&"]
-        lower_chars = [i for i in range(97, 123)]
-        upper_chars = [i for i in range(65, 91)]
-        digits = [i for i in range(0, 10)]
+        lower_chars = [chr(i) for i in range(97, 123)]
+        upper_chars = [chr(i) for i in range(65, 91)]
+        digits = [chr(i) for i in range(48, 58)]
 
         valid = {'has_special_char': False, 'has_lower_char': False, 'has_upper_char': False, 'has_digit': False}
         for i in password.data:
@@ -33,9 +33,9 @@ class UserRegistrationForm(FlaskForm):
             elif i in digits:
                 valid['has_digit'] = True
             
-            if all(valid.items()):
+            if all(valid.values()):
                 break
-        print(valid)
+        print("--->",valid)
         if not all(valid.values()):
                 raise ValidationError("Password should be atleast 8 char long and have atleast 1 lower char, 1 upper char, 1 special char and 1 digit")
 
