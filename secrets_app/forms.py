@@ -40,11 +40,6 @@ class UserRegistrationForm(FlaskForm):
                 raise ValidationError("Password should be atleast 8 char long and have atleast 1 lower char, 1 upper char, 1 special char and 1 digit")
 
 
-
-
-
-
-
 class UserLoginForm(FlaskForm):
     email = StringField('email', validators=[DataRequired(), Email()])
     password = PasswordField('password', validators=[DataRequired()])
