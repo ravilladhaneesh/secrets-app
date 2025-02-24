@@ -1,6 +1,8 @@
 from secrets_app import db, login_manager
 from flask_login import UserMixin
-
+from sqlalchemy.orm import backref
+from sqlalchemy import PrimaryKeyConstraint
+from datetime import datetime
 
 @login_manager.user_loader
 def user_loader(user_id):
@@ -12,30 +14,37 @@ class User(db.Model, UserMixin):
     firstName = db.Column(db.String(20), nullable=False)
     lastName = db.Column(db.String(30), nullable=True)
     email = db.Column(db.String(60), nullable=False, unique=True)
-    password = db.Column(db.String(60), nullable=False)
+    password = db.Column(db.String(60), nullable=True)
+    is_oauth = db.Column(db.Boolean, nullable=False, default=False)
     key = db.Column(db.String(60), nullable=True)
-    secrets = db.relationship('Secret', backref='user', lazy=True)
+    secrets = db.relationship('Secret', backref=backref('user', passive_deletes=True), lazy=True, cascade='all, delete')
+    last_login = db.Column(db.Date, nullable=False, default=datetime.now)
+    is_verified = db.Column(db.Boolean, default=False, nullable=False)
+    otp = db.Column(db.String(6), nullable=True)
+    otp_expiration = db.Column(db.Date, nullable=True)
+    otp_attempts = db.Column(db.Integer, default=0)
+    required_login_per_days = db.Column(db.Integer, nullable=False, default=30)
 
     def __repr__(self):
-        return f"User('{self.firstName}, {self.lastName}, {self.email}')"
+        return f"User('{self.firstName}', '{self.lastName}, '{self.email}')"
 
 
 class Secret(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     fieldName = db.Column(db.String(100), nullable=False)
     fieldSecret = db.Column(db.String(100), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    emails = db.relationship('Email', backref='sentTo', lazy=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    nominees = db.relationship('Nominee', backref='secrets', cascade='all, delete', lazy=True) #Update to remove backref
 
     def __repr__(self):
-        return f"Secret('{self.id}' '{self.user_id}')"
+        return f"Secret('{self.id}' '{self.fieldName}' '{self.user_id}')"
 
 
-class Email(db.Model):
-    id = db.Column(db.Integer(), primary_key=True)
-    email_address = db.Column(db.String(100), unique=True, nullable=False)
-    secret_id = db.Column(db.Integer, db.ForeignKey('secret.id'))
-    
+class Nominee(db.Model):
+    id = db.Column(db.Integer)
+    name = db.Column(db.String(100))
+    email_id = db.Column(db.String(100), primary_key=True)
+    secret_id = db.Column(db.Integer, db.ForeignKey('secret.id'), primary_key=True)
 
     def __repr__(self):
-        return f"Email('{self.email_address}')"
+        return f"Email('{self.name}', '{self.email_id})"
