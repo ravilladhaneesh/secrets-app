@@ -4,3 +4,4 @@ instance
 migrations
 migrations/*
 .env
+client_secret.json

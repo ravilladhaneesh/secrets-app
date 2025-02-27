@@ -31,9 +31,10 @@ app.config['OAUTH2_PROVIDERS'] = {
                 'url': 'https://www.googleapis.com/oauth2/v3/userinfo',
                 'email': lambda json: json['email'],
             },
-            'scopes': ['https://www.googleapis.com/auth/userinfo.email'
-                    #    , 'https://www.googleapis.com/auth/gmail.send'
-                    ]
+            'scopes': {
+                        "userinfo": 'https://www.googleapis.com/auth/userinfo.email',
+                        "sendmessage": 'https://www.googleapis.com/auth/gmail.send'
+                    }
         }
     }
 

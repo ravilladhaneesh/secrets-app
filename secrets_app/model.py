@@ -20,6 +20,7 @@ class User(db.Model, UserMixin):
     secrets = db.relationship('Secret', backref=backref('user', passive_deletes=True), lazy=True, cascade='all, delete')
     last_login = db.Column(db.Date, nullable=False, default=datetime.now)
     is_verified = db.Column(db.Boolean, default=False, nullable=False)
+    send_email_authorized = db.Column(db.Boolean, default=False)
     otp = db.Column(db.String(6), nullable=True)
     otp_expiration = db.Column(db.Date, nullable=True)
     otp_attempts = db.Column(db.Integer, default=0)
