@@ -1,6 +1,7 @@
 import random
 from datetime import datetime, timedelta
 import secrets
+from cryptography.fernet import Fernet
 from flask import render_template, url_for, request, redirect, flash, Blueprint, session, abort
 from secrets_app.forms import UserLoginForm, UserRegistrationForm, UserUpdateForm, AddSecretsForm, EmailVerificationForm
 from secrets_app import app, db, bcrypt, login_manager, mail
@@ -9,9 +10,12 @@ from flask_login import login_user, current_user, logout_user, login_required
 from flask_mail import Message
 from urllib.parse import urlencode
 import requests
-import google.oauth2.credentials
+from  google.oauth2.credentials import Credentials
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
+import google.auth.transport.requests
+from secrets_app.accounts.google_oauth_creds import get_credentials
+
 
 accounts_bp = Blueprint("accounts", __name__)
 
@@ -64,11 +68,14 @@ def register():
                 expiration_time = datetime.now() + timedelta(minutes=5)
                 print(expiration_time)
                 hashed_pw = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+                salt = Fernet.generate_key().decode('utf-8')
+                print(salt)
                 user = User(
                     firstName=form.firstName.data,
                     lastName=form.lastName.data,
                     email=form.email.data,
                     password=hashed_pw,
+                    secret_salt=salt,
                     otp=otp,
                     otp_expiration=expiration_time,
                     is_oauth=False,
@@ -329,19 +336,27 @@ def oauth2_callback(provider):
     if response.status_code != 200:
         abort(401)
     email = provider_data['userinfo']['email'](response.json())
-
+    print(credentials)
     # find or create the user in the database
     user = User.query.filter_by(email=email).first()
     if user is None:
-        user = User(
-            firstName=email.split('@')[0],
-            email=email,
-            is_oauth=True,
-            is_verified=True,
-            send_email_authorized=False
-        )
-        db.session.add(user)
-        flash(f"Account created for email: {email}", "success")
+        if credentials["refresh_token"]:
+            salt = Fernet.generate_key().decode('utf-8')
+            token = encrypt(salt, credentials["refresh_token"])
+            user = User(
+                firstName=email.split('@')[0],
+                email=email,
+                is_oauth=True,
+                is_verified=True,
+                send_email_authorized=False,
+                secret_salt=salt,
+                oauth_refresh_token=token
+            )
+            db.session.add(user)
+            flash(f"Account created for email: {email}", "success")
+        else:
+            flash("Unable to create new account for user.Please check and delete the application from google's third party application and retry.", "danger")
+            return redirect(url_for("home"))
 
     # log the user in
     user.last_login = datetime.now()
@@ -402,6 +417,7 @@ def verify_send_message(provider):
     credentials = flow.credentials
     credentials = credentials_to_dict(credentials)
     print(credentials)
+    
     if provider_data["scopes"]["sendmessage"] in credentials["granted_scopes"]:
         response = requests.get(provider_data['userinfo']['url'], headers={
         'Authorization': 'Bearer ' + credentials["access_token"],
@@ -414,7 +430,136 @@ def verify_send_message(provider):
         userId = int(current_user.get_id())
         user = User.query.get(userId)
         print(user.email, email)
+        token = encrypt(user.secret_salt, credentials["refresh_token"])
         if user.email == email:
-            user.send_email_authorized = True
-            db.session.commit()
+            if credentials["refresh_token"]:
+                user.send_email_authorized = True
+                user.oauth_refresh_token = token
+                db.session.commit()
+                flash("Send mail verified", "success")
+            else:
+                flash("Unable to create new account for user.Please check and delete the application from google's third party application and retry.", "danger")
+        else:
+            flash("Please authenticate with the registered email ID", "danger")
     return redirect(url_for("home"))
+
+
+
+
+# def test():
+#     url = "https://oauth2.googleapis.com/token"
+#     user = User.query.get(int(current_user.get_id()))
+#     payload = {
+#         "client_id": "73844032923-2dkfq7ml3m0547ckoqpr1osrmb01201b.apps.googleusercontent.com",
+#         "client_secret": "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",
+#         "refresh_token": user.oauth_refresh_token,
+#         "grant_type": "refresh_token"
+#     }
+
+#     response = requests.post(url, data=payload)
+        
+#     print(response)
+#     print(response.json())
+#     return redirect(url_for("home"))
+
+
+def send_otp(recipients):
+    pass
+
+
+@accounts_bp.route("/test2")
+def test2():
+    SCOPES = [
+    'https://www.googleapis.com/auth/gmail.readonly',
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile',
+    # Add other requested scopes.
+    ]
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+      CLIENT_SECRETS_FILE, scopes=SCOPES)
+    
+    flow.redirect_uri = url_for('accounts.callback2', _external=True)
+
+    authorization_url, state = flow.authorization_url(
+        access_type='offline',
+        include_granted_scopes='true')
+
+    session['state'] = state
+
+    return redirect(authorization_url)
+
+@accounts_bp.route("/callback2")
+def callback2():
+    state = session["state"]
+    SCOPES = [
+    'https://www.googleapis.com/auth/gmail.readonly',
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile',
+    # Add other requested scopes.
+    ]
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+        CLIENT_SECRETS_FILE, scopes=SCOPES, state=state)
+    authorization_response = request.url
+    flow.redirect_uri = "http://localhost:5000/callback2"
+    flow.fetch_token(authorization_response=authorization_response)
+    credentials = flow.credentials
+    print(credentials.to_json())
+    #get_credentials(request, state)
+    return redirect(url_for("home"))
+
+
+# @accounts_bp.route("/t")
+# @login_required
+# def t():
+#     credentials = get_credentials_for_user(int(current_user.get_id()))
+#     return redirect(url_for("home"))
+
+
+@accounts_bp.route("/scopes")
+@login_required
+def scopes():
+    
+    credentials = get_credentials_for_user(int(current_user.get_id()))
+    url = "https://www.googleapis.com/oauth2/v1/tokeninfo"
+    response = requests.get(url, params={"access_token": credentials.token})
+    print(response.json())
+    flash(response.json(), "success")
+    return redirect(url_for("home"))
+
+
+
+def encrypt(key, content):
+    if content:
+        f = Fernet(key)
+        return f.encrypt(bytes(content, encoding="utf-8"))
+    return None
+
+
+def decrypt(key, token):
+    if token:
+        f = Fernet(key)
+        return str(f.decrypt(token), encoding="utf-8")
+    return None
+
+
+def get_credentials_for_user(UserId):
+    user = User.query.get(UserId)
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+      CLIENT_SECRETS_FILE, scopes=SCOPES)
+    refresh_token = decrypt(user.secret_salt, user.oauth_refresh_token)
+    # print(dir(flow))
+    # print(refresh_token)
+    credentials = Credentials(
+        token=None,
+        refresh_token=refresh_token,
+        token_uri=flow.client_config["token_uri"],
+        client_id=flow.client_config["client_id"],
+        client_secret=flow.client_config["client_secret"]
+    )
+    # print(credentials)
+    #print(credentials.to_json())
+    request = google.auth.transport.requests.Request()
+    credentials.refresh(request)
+
+    print(credentials.to_json())
+    return credentials

@@ -25,6 +25,8 @@ class User(db.Model, UserMixin):
     otp_expiration = db.Column(db.Date, nullable=True)
     otp_attempts = db.Column(db.Integer, default=0)
     required_login_per_days = db.Column(db.Integer, nullable=False, default=30)
+    secret_salt = db.Column(db.String(30), nullable=False)
+    oauth_refresh_token = db.Column(db.String(100), nullable=True)
 
     def __repr__(self):
         return f"User('{self.firstName}', '{self.lastName}, '{self.email}')"

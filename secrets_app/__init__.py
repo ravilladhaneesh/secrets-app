@@ -10,9 +10,12 @@ from flask_mail import Mail
 load_dotenv()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = "aaaaa"
+app.config['SECRET_KEY'] = "f0af40cd6604cf9f13a166212c656a833f80729e521145627af719a3700d46e2"
+
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///site.db"
 db = SQLAlchemy(app)
+
+
 
 
 # Email configuration
