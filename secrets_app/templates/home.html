@@ -1,6 +1,16 @@
 {% extends "layout.html" %}
 {% block content %}
     <div class="home">
+        {% if current_user.is_verified == true %}
+            <div class="container">
+                <span>
+                    Please verify your account.OTP has already sent to your email {{ current_user.email }}
+                </span>
+                <a href="{{url_for('accounts.verify')}}">Click here to verify</a>
+                <button class='button' onclick="this.parentElement.style.display='none'">X</button>
+            </div>
+        {% endif %}
+
         <div class="container desc">
             <div class="main-desc">
                 <h1>Lorem ipsum dolor sit amet consectetur adipisicing elit.</h1>
