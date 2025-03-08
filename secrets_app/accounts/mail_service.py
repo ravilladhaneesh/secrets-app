@@ -45,8 +45,8 @@ def gmail_send_message(credentials):
         .execute()
     )
     print(f"service: {service.users().messages()}")
-    print(f'Message {message['From']}')
-    print(f'Message {message['To']}')
+    print(f"Message {message['From']}")
+    print(f"Message {message['To']}")
     # print(f'Message Id: {send_message["id"]}')
   except HttpError as error:
     print(f"An error occurred: {error}")
@@ -57,11 +57,11 @@ def gmail_send_message(credentials):
 
 def send_otp_from_root_account(otp, email_to):
     rootUser = User.query.filter_by(email=ROOT_USER_EMAIL).first()
-    # try:
-    #    from secrets_app.accounts.routes import get_credentials_for_user
-    # except ImportError as err:
-    #    print("Import Error", err)
-
+    try:
+       from secrets_app.accounts.routes import get_credentials_for_user
+    except ImportError as err:
+       print("Import Error", err)
+       raise ImportError
     credentials = get_credentials_for_user(rootUser.id)
     service = build("gmail", "v1", credentials=credentials)
     message = EmailMessage()

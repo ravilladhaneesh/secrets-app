@@ -83,13 +83,13 @@ def register():
                     is_verified=False,
                     send_email_authorized=False)
                 
-                send_otp_from_root_account(otp, form.email.data)
+                # send_otp_from_root_account(otp, form.email.data)
 
                 db.session.add(user)
                 db.session.commit()
                 flash(f'Account created for email {form.email.data}!.You can now login in.', 'success')
                 flash(f'OTP sent to email.Please verify your email', 'success')
-                return redirect(url_for('accounts.login'))
+                return redirect(url_for('accounts.verify'))
             else:
                 flash("Email Already registered.Please enter valid email")
         else:
