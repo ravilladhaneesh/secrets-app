@@ -106,6 +106,22 @@ body {
 
 }
 
+.login {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* .login div{
+  margin-left: 2px;
+} */
+
+.login div .google-sign-in{
+  padding-left: 1rem;
+}
+
+.login .need-account{
+  padding-left: 1rem;
+}
 
 .input-fields .input-field{
   width: 20%;
