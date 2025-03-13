@@ -42,6 +42,13 @@ class Secret(db.Model):
     def __repr__(self):
         return f"Secret('{self.id}' '{self.fieldName}' '{self.user_id}')"
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'fieldName': self.fieldName,
+            'fieldSecret': self.fieldSecret,
+            'nominees': [{'name': nominee.name, 'email_id': nominee.email_id} for nominee in self.nominees]
+        }
 
 class Nominee(db.Model):
     id = db.Column(db.Integer)

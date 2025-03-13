@@ -1,5 +1,5 @@
 from flask import render_template, url_for, request, redirect, flash
-from secrets_app.forms import UserLoginForm, UserRegistrationForm, UserUpdateForm, AddSecretsForm
+from secrets_app.forms import UserLoginForm, UserRegistrationForm, UserUpdateForm, AddSecretsForm, AddNomineeForm
 from secrets_app import app, db, bcrypt, login_manager
 from secrets_app.model import User, Secret, Nominee
 from flask_login import login_user, current_user, logout_user, login_required
@@ -15,50 +15,6 @@ dummy_secrets_data = [
 @app.route("/")
 def home():
     return render_template("home.html", title='home')
-
-
-
-# @app.route("/register", methods=["GET", "POST"])
-# def register():
-#     if current_user.is_authenticated:
-#         return redirect(url_for('home'))
-#     form = UserRegistrationForm()
-#     if request.method == "POST":
-#         print(form.validate_on_submit() == True)
-#         if form.validate_on_submit():
-#             hashed_pw = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-#             user = User(firstName=form.firstName.data, lastName=form.lastName.data, email=form.email.data, password=hashed_pw)
-#             db.session.add(user)
-#             db.session.commit()
-#             flash(f'Account created for email {form.email.data}!.You can now login in.', 'success')
-#             return redirect(url_for('login'))
-#         else:
-#             flash(f'Error Validating the form', 'danger')
-#     return render_template("register.html", form=form, title='register')
-
-
-# @app.route("/login", methods=["GET", "POST"])
-# def login():
-#     if current_user.is_authenticated:
-#         return redirect(url_for('home'))
-#     form = UserLoginForm()
-#     if request.method == "POST":
-#         if form.validate_on_submit():
-#             user = User.query.filter_by(email=form.email.data).first()
-#             if user and bcrypt.check_password_hash(user.password, form.password.data):
-#                 login_user(user, remember=False)
-#                 next = request.args.get("next")
-#                 flash(f'Logged In as {user.firstName}', 'success')
-#                 return redirect(next) if next else redirect(url_for('home'))
-#         flash('Login failed. Please check username and password', 'danger')
-#     return render_template("login.html", form=form, title='login')
-
-
-# @app.route("/logout", methods=["GET"])
-# @login_required
-# def logout():
-#     logout_user()
-#     return redirect(url_for('login'))
 
 
 @app.route("/nominees")
@@ -82,63 +38,130 @@ def nominees():
 #     return render_template('secret.html', form=form)
 
 
-@app.route("/secrets",methods=["GET", "POST"])
+# @app.route("/secrets",methods=["GET", "POST"])
+# @login_required
+# def secrets():
+#     if not current_user.is_authenticated:
+#         return redirect(url_for('login'))
+#     userId = current_user.get_id()
+#     user = User.query.get(int(userId))
+#     form = AddSecretsForm()
+#     secrets_data = []
+#     print("hello")
+#     print("\n\n\n")
+#     for item in form:
+#         print(item)
+#     if form.validate_on_submit():
+#         print("hai")
+#         secret_name = form.name.data
+#         secret_value = form.secret.data
+#         nominees = []
+#         for nominee in form.nominees.data:
+#             nominee_obj = Nominee(name=nominee["nominee_name"], email_id=nominee["email_id"])
+#             nominees.append(nominee_obj)
+#         secret = Secret(fieldName=secret_name, fieldSecret=secret_value, nominees=nominees, user_id=int(userId))
+#         print(secret)
+#         db.session.add(secret)
+#         db.session.commit()
+#         flash("New Secret Added", "success")
+#         secrets_data.append(secret)
+#         return redirect(url_for('secrets'))
+#     secrets_data.extend(dummy_secrets_data)
+#     secrets = Secret.query.filter_by(user_id=int(userId))
+#     for secret in secrets:
+#         secrets_data.append(secret)
+#     print(secrets_data)
+#     for i in secrets_data:
+#         print(i.fieldName)
+#     return render_template("secrets.html", form=form, title='secrets', secrets=secrets_data)
+
+
+
+@app.route("/secrets", methods=["GET", "POST"])
 @login_required
 def secrets():
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
+    
     userId = current_user.get_id()
     user = User.query.get(int(userId))
     form = AddSecretsForm()
     secrets_data = []
+
+    if request.method == "POST":
+        if form.validate_on_submit():  # Flask-WTF handles validation automatically
+            print("hello")
+            secret_name = form.name.data
+            secret_value = form.secret.data
+            nominees = []
+
+            for nominee in form.nominees.data:
+                nominee_obj = Nominee(name=nominee["name"], email_id=nominee["email_id"])
+                nominees.append(nominee_obj)
+
+            secret = Secret(fieldName=secret_name, fieldSecret=secret_value, nominees=nominees, user_id=int(userId))
+            db.session.add(secret)
+            db.session.commit()
+            flash("New Secret Added", "success")
+            return redirect(url_for('secrets'))
+        else:
+            # If form is not valid, display the errors
+            flash("Form contains errors, please correct them.", "danger")
+
+    # Fetch user's secrets
+    secrets = Secret.query.filter_by(user_id=int(userId)).all()
+    secrets_dict = [secret.to_dict() for secret in secrets]
+    
+    return render_template('secrets.html', secrets=secrets_dict, form=form, title="Secrets List")
+
+
+@app.route("/deleteSecret/<int:secretId>", methods=["GET", "POST"])
+@login_required
+def delete_secret(secretId):
+    userId = current_user.get_id()
+    user = User.query.get(int(userId))
+    secret = Secret.query.get_or_404(secretId)
+    if secret.user_id == user.id:
+        db.session.delete(secret)
+        db.session.commit()
+        flash("Deleted the secret {secret.name}", "success")
+        return redirect(url_for('secrets'))
+    flash("Invalid secret selected", "danger")
+    return redirect(url_for('secrets'))
+
+
+@app.route("/editSecret/<int:secretId>", methods=["GET", "POST"])
+@login_required
+def edit_secret(secretId):
+    secret = Secret.query.get_or_404(secretId)
+
+    form = AddSecretsForm()
     if form.validate_on_submit():
-        secret_name = form.name.data
-        secret_value = form.secret.data
-        nominees = []
-        for nominee in form.nominees.data:
-            nominee_obj = Nominee(name=nominee["nominee_name"], email_id=nominee["email_id"])
-            nominees.append(nominee_obj)
-        secret = Secret(fieldName=secret_name, fieldSecret=secret_value, nominees=nominees, user_id=int(userId))
+        print("hello")
+        secret.fieldName = form.name.data
+        secret.fieldSecret = form.secret.data
+        for i in secret.nominees:
+            db.session.delete(i)
+
+        for nominee_form in form.nominees.data:
+            new_nominee = Nominee(
+                name=nominee_form["name"],
+                email_id=nominee_form["email_id"]
+            )
+            db.session.add(new_nominee)
+            secret.nominees.append(new_nominee)
+        print("\n\n\n\n\n")
+
         db.session.add(secret)
         db.session.commit()
-        flash("New Secret Added", "success")
-        secrets_data.append(secret)
-        return redirect(url_for('secrets'))
-    secrets_data.extend(dummy_secrets_data)
-    secrets = Secret.query.filter_by(user_id=int(userId))
-    for secret in secrets:
-        secrets_data.append(secret)
-    print(secrets_data)
-    for i in secrets_data:
-        print(i.fieldName)
-    return render_template("secret.html", form=form, title='secrets', secrets=secrets_data)
+        flash("Secret updated successfully", "success")
+        return redirect(url_for("secrets"))
+    if request.method == "GET":
+        form.name.data = secret.fieldName
+        for nominee in secret.nominees:
+            nominee_form = AddNomineeForm()
+            nominee_form.name = nominee.name
+            nominee_form.email_id = nominee.email_id
+            form.nominees.append_entry(nominee_form)
 
-
-# @app.route("/account", methods=["GET", "POST"])
-# @login_required
-# def account():
-#     form = UserUpdateForm()
-#     userId = int(current_user.get_id())
-#     user = User.query.get(userId)
-#     if request.method == "POST":
-        
-#         for field, errorMessage in form.errors.items():
-#             print(field, errorMessage)
-#         if user and form.validate_on_submit():
-#             user.firstName = form.firstName.data
-#             user.lastName = form.lastName.data
-#             user.required_login_per_days = form.required_login_per_days.data
-#             print(user.firstName, user.lastName, user.required_login_per_days)
-#             db.session.commit()
-#             flash("User Details Updated", 'success')
-#             return redirect(url_for('account'))
-#         print(form.errors)
-#         print("Hi")
-#     elif request.method == "GET":
-#         form.firstName.data = current_user.firstName
-#         form.lastName.data = current_user.lastName
-#         form.required_login_per_days.data = current_user.required_login_per_days
-#     return render_template('account.html', form=form)
-
-
-
+    return render_template('edit_secret.html', form=form)

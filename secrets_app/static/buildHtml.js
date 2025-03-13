@@ -22,16 +22,17 @@ function addNominees() {
     newField.innerHTML  = `
         <div>
             <label>Nominee Name:</label>
-            <input type="text" name="nominees-${index}-nominee_name" required>
+            <input type="text" name="nominees-${index}-name" required>
             <label>email:</label>
             <input type="text" name="nominees-${index}-email_id" required>
-            <button type="button" onclick="removeProductField('nominee-field-${index}')">Remove</button>
+            <button type="button" onclick="removeNominee('nominee-field-${index}')">Remove</button>
         </div>
     `;
     container.appendChild(newField);
 }
 
-function removeProductField(id) {
+function removeNominee(id) {
+    console.log("remove" + id);
     var field = document.getElementById(id);
     if (field) {
         field.remove();

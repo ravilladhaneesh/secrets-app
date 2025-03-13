@@ -15,6 +15,7 @@ import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import google.auth.transport.requests
 from secrets_app.accounts.google_oauth_creds import get_credentials
+from secrets_app.accounts.mail_service import gmail_send_message, send_otp_from_root_account
 
 
 accounts_bp = Blueprint("accounts", __name__)
@@ -82,15 +83,13 @@ def register():
                     is_verified=False,
                     send_email_authorized=False)
                 
-                msg = Message("Your OTP Code", sender="ravilladhaneesh@gmail.com", recipients=[form.email.data])
-                msg.body = f"Your OTP code is: {otp}"
-                # mail.send(msg)
+                # send_otp_from_root_account(otp, form.email.data)
 
                 db.session.add(user)
                 db.session.commit()
                 flash(f'Account created for email {form.email.data}!.You can now login in.', 'success')
                 flash(f'OTP sent to email.Please verify your email', 'success')
-                return redirect(url_for('accounts.login'))
+                return redirect(url_for('accounts.verify'))
             else:
                 flash("Email Already registered.Please enter valid email")
         else:
@@ -374,7 +373,7 @@ def authorize_send_message(provider):
         return redirect(url_for("accounts.login"))
 
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-      CLIENT_SECRETS_FILE, scopes=SCOPES["sendMail"])
+      CLIENT_SECRETS_FILE, scopes=[SCOPES["userInfo"], SCOPES["sendMail"]])
     flow.redirect_uri = url_for('accounts.verify_send_message', provider=provider, _external=True)
 
     authorization_url, state = flow.authorization_url(
@@ -382,7 +381,7 @@ def authorize_send_message(provider):
         include_granted_scopes='true')
 
     session['state'] = state
-
+    print("\n\n HELLO \n\n")
     return redirect(authorization_url)
 
 
@@ -518,12 +517,12 @@ def callback2():
 @accounts_bp.route("/scopes")
 @login_required
 def scopes():
-    
     credentials = get_credentials_for_user(int(current_user.get_id()))
     url = "https://www.googleapis.com/oauth2/v1/tokeninfo"
     response = requests.get(url, params={"access_token": credentials.token})
     print(response.json())
     flash(response.json(), "success")
+    # message = gmail_send_message(credentials=credentials)
     return redirect(url_for("home"))
 
 

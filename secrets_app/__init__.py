@@ -19,7 +19,7 @@ db = SQLAlchemy(app)
 
 
 # Email configuration
-
+app.config["ROOT_EMAIL"] = 'ravilladhaneesh@gmail.com'
 mail = Mail(app)
 
 app.config['OAUTH2_PROVIDERS'] = {

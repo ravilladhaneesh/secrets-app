@@ -60,15 +60,15 @@ class UserUpdateForm(FlaskForm):
 class AddNomineeForm(FlaskForm):
     class Meta:
         csrf = False
-    nominee_name = StringField('Nominee Name', validators=[DataRequired()])
+    name = StringField('Nominee Name', validators=[DataRequired()])
     email_id = EmailField('Email', validators=[DataRequired()])        
     
 
 class AddSecretsForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     secret = StringField("Secret", validators=[DataRequired()])
-    nominees = FieldList(FormField(AddNomineeForm), min_entries=1)
-    submit = SubmitField("Submit", validators=[DataRequired()])
+    nominees = FieldList(FormField(AddNomineeForm), min_entries=0)
+    submit = SubmitField("Submit")
 
 
 class EmailVerificationForm(FlaskForm):
