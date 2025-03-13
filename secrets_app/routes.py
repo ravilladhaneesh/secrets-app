@@ -87,9 +87,11 @@ def secrets():
     user = User.query.get(int(userId))
     form = AddSecretsForm()
     secrets_data = []
-
+    
     if request.method == "POST":
-        if form.validate_on_submit():  # Flask-WTF handles validation automatically
+        if form.validate_on_submit():
+            for nominee in form.nominees:
+                print(nominee)
             print("hello")
             secret_name = form.name.data
             secret_value = form.secret.data
@@ -158,10 +160,15 @@ def edit_secret(secretId):
         return redirect(url_for("secrets"))
     if request.method == "GET":
         form.name.data = secret.fieldName
-        for nominee in secret.nominees:
-            nominee_form = AddNomineeForm()
-            nominee_form.name = nominee.name
-            nominee_form.email_id = nominee.email_id
-            form.nominees.append_entry(nominee_form)
+        # for nominee in secret.nominees:
+        #     # nominee_form = AddNomineeForm()
+        #     # nominee_form.name = nominee.name
+        #     # nominee_form.email_id = nominee.email_id
+        #     # form.nominees.append_entry(nominee_form)
+        #     form.nominees.append_entry({
+        #         'name': nominee.name,
+        #         'email_id': nominee.email_id
+        #     })
+        #     print(nominee)
 
-    return render_template('edit_secret.html', form=form)
+    return render_template('edit_secret.html', form=form, secret=secret, title="Edit Secret")
