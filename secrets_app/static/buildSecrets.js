@@ -21,7 +21,8 @@ function cancelSecretForm() {
 // Add nominee input fields dynamically
 function addNominees() {
     var container = document.getElementById("nominee-fields");
-    var index = container.children.length;
+    // var index = container.children.length;
+    var index = findFirstMissingValue(container);
     var newField = document.createElement("div");
     newField.setAttribute("id", "nominee-field-" + index);
     newField.innerHTML  = `
@@ -30,7 +31,7 @@ function addNominees() {
             <input type="text" name="nominees-${index}-name" required>
             <label>Email:</label>
             <input type="text" name="nominees-${index}-email_id" required>
-            <button type="button" onclick="removeNominee('nominee-field-${index}')">Remove</button>
+            <button class='remove-nominee-btn' type="button" onclick="removeNominee('nominee-field-${index}')">Remove</button>
         </div>
     `;
     container.appendChild(newField);
@@ -38,10 +39,12 @@ function addNominees() {
 
 // Remove nominee input field
 function removeNominee(id) {
+    var container = document.getElementById("nominee-fields");
     var field = document.getElementById(id);
     if (field) {
         field.remove();
     }
+    container.removeChild(id);
 }
 
 // Show secret details in a popup
@@ -66,3 +69,17 @@ function showSecretDetails(secret) {
 function closePopup() {
     document.getElementById('overlay').style.display = 'none';
 }
+
+function findFirstMissingValue(divObj){
+    var len = divObj.children.length;
+    let indexes = [];
+    for(let div in divObj.children) {
+        indexes.push(divObj.children[div].id);
+    }
+    for (let i=0;i < len; i++){
+        if(!indexes.includes('nominee-field-'+i))
+            return i;
+    }
+    return len;
+}
+
