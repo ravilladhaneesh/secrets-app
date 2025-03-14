@@ -356,6 +356,12 @@ def oauth2_callback(provider):
         else:
             flash("Unable to create new account for user.Please check and delete the application from google's third party application and retry.", "danger")
             return redirect(url_for("home"))
+    else:
+        if not user.is_oauth:
+            user.is_oauth = True
+            if credentials["refresh_token"]:
+                token = encrypt(user.secret_salt, credentials["refresh_token"])
+                user.oauth_refresh_token = token
 
     # log the user in
     user.last_login = datetime.now()
