@@ -37,7 +37,7 @@ class Secret(db.Model):
     fieldName = db.Column(db.String(100), nullable=False)
     fieldSecret = db.Column(db.String(100), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
-    nominees = db.relationship('Nominee', backref='secrets', cascade='all, delete', lazy=True) #Update to remove backref
+    nominees = db.relationship('Nominee', backref='secret', cascade='all, delete', lazy=True) #Update to remove backref
 
     def __repr__(self):
         return f"Secret('{self.id}' '{self.fieldName}' '{self.user_id}')"
@@ -54,7 +54,8 @@ class Nominee(db.Model):
     id = db.Column(db.Integer)
     name = db.Column(db.String(100))
     email_id = db.Column(db.String(100), primary_key=True)
-    secret_id = db.Column(db.Integer, db.ForeignKey('secret.id'), primary_key=True)
+    secret_id = db.Column(db.Integer, db.ForeignKey('secret.id', ondelete='CASCADE'), primary_key=True)
+    # secret = db.relationship('Secret', backref=backref('nominees', passive_deletes=True), cascade='all, delete', lazy=True) can't be possible
 
     def __repr__(self):
         return f"Email('{self.name}', '{self.email_id})"
