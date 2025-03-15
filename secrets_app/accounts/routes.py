@@ -173,8 +173,6 @@ def logout():
     return redirect(url_for('accounts.login'))
 
 
-
-
 @accounts_bp.route("/account", methods=["GET", "POST"])
 @login_required
 def account():
