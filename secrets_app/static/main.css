@@ -115,11 +115,12 @@ body {
   margin-left: 2px;
 } */
 
-.login div .google-sign-in{
+.login div .google-sign-in, .register div .google-sign-up{
   padding-left: 1rem;
 }
 
-.login .need-account{
+
+.login .need-account, .register .already-have-account{
   padding-left: 1rem;
 }
 
