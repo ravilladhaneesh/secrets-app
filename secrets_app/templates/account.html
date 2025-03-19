@@ -1,68 +1,90 @@
 {% extends "layout.html" %}
 {% block content %}
-    <div class="container-sm border">
+<div class="container-sm account-container">
+    <!-- Account Info Section -->
+    <div class="account-info text-center">
+        <h3 class="display-5">{{ current_user.firstName }}</h3>
+        <p class="lead text-muted">{{ current_user.email }}</p>
+    </div>
 
-        <div class="account-info">
-            <h2>{{current_user.firstName}}</h2>
-            <p>{{current_user.email}}</p>
-        </div>
-
-        <div class="update-account border">
-            <form action="#" method="POST" class="form">
-                {{ form.hidden_tag() }}
-
-                <fieldset class="input-fieldset">
-                    <legend>
-                        Update Account
-                    </legend>
-                    <hr>
-                    <div class="input-fields">
-                        {{form.firstName.label(class="field-label")}} <br>
+    <!-- Update Account Section -->
+    <div class="update-account">
+        <form action="#" method="POST" class="form">
+            {{ form.hidden_tag() }}
+            
+            <fieldset class="input-fieldset">
+                <legend>Update Your Information</legend>
+                <hr class="divider">
+                
+                <!-- First Name Field -->
+                <div class="input-fields">
+                    <div class="field-label">
+                        <label for="firstName" class="field-label">{{ form.firstName.label }}</label>
+                    </div>
+                    <div class="field-input">
                         {% if form.firstName.errors %}
+                        <div class="error-feedback">
                             {{ form.firstName(class="input-field field-invalid") }}
                             <div class="feedback">
                                 {% for error in form.firstName.errors %}
-                                    <span>{{ error }}</span>
+                                    <span class="text-danger">{{ error }}</span>
                                 {% endfor %}
                             </div>
+                        </div>
                         {% else %}
                             {{ form.firstName(class="input-field") }}
                         {% endif %}
                     </div>
+                    
+                </div>
 
-                    <div class="input-fields">
-                        {{form.lastName.label(class="field-label")}} <br>
+                <!-- Last Name Field -->
+                <div class="input-fields">
+                    <div class="field-label">
+                        <label for="lastName" class="field-label">{{ form.lastName.label }}</label>
+                    </div>
+                    <div class="field-input">
                         {% if form.lastName.errors %}
+                        <div class="error-feedback">
                             {{ form.lastName(class="input-field field-invalid") }}
                             <div class="feedback">
                                 {% for error in form.lastName.errors %}
-                                    <span>{{ error }}</span>
+                                    <span class="text-danger">{{ error }}</span>
                                 {% endfor %}
                             </div>
+                        </div>
                         {% else %}
                             {{ form.lastName(class="input-field") }}
                         {% endif %}
                     </div>
+                </div>
 
-                    <div class="input-fields">
-                        {{form.required_login_per_days.label(class="field-label")}} <br>
+                <!-- Required Login Per Days Field -->
+                <div class="input-fields">
+                    <div class="field-label">
+                        <label for="required_login_per_days" class="field-label">{{ form.required_login_per_days.label }}</label>
+                    </div>
+                    <div class="field-input">
                         {% if form.required_login_per_days.errors %}
+                        <div class="error-feedback">
                             {{ form.required_login_per_days(class="input-field field-invalid") }}
                             <div class="feedback">
                                 {% for error in form.required_login_per_days.errors %}
-                                    <span>{{ error }}</span>
+                                    <span class="text-danger">{{ error }}</span>
                                 {% endfor %}
                             </div>
+                        </div>
                         {% else %}
                             {{ form.required_login_per_days(class="input-field") }}
                         {% endif %}
                     </div>
-                </fieldset>
-
-                <div class="submit-field">
-                    {{form.submit(class='btn btn-outline-info')}}
                 </div>
-            </form>
-        </div>
+            </fieldset>
+
+            <div class="submit-field text-center">
+                {{ form.submit(class='btn btn-primary btn-lg') }}
+            </div>
+        </form>
     </div>
+</div>
 {% endblock content %}

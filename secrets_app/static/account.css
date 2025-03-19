@@ -1,0 +1,15 @@
+.update-account {
+    /* background-color: rgb(204, 227, 239); */
+    width: 75%;
+    
+}
+  
+.account-info {
+    padding-top: 1rem;
+    margin: 0%;
+}
+
+.input-fields .field-label{
+    /* background-color: red; */
+    font-weight: 400;
+}
