@@ -1,0 +1,42 @@
+.update-account {
+    /* background-color: rgb(204, 227, 239); */
+    width: 75%;
+    
+}
+  
+.account-info {
+    padding-top: 1rem;
+    margin: 0%;
+}
+
+.input-fields .field-label{
+    font-weight: 400;
+}
+
+
+.account-info .email {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.email .address {
+    margin-right: 10px;
+    align-self: center;
+    
+}
+
+.email .address p {
+    margin: 0%;
+}
+
+.email .is-verified img {
+    width: 20px;
+    height: auto;
+}
+
+.email .is-verified .verify{
+    text-decoration: none;
+    color: red;
+}
