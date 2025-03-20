@@ -1,0 +1,8 @@
+
+services:
+  secrets-app:
+    build: .
+    command: python run.py
+    ports:
+      - 5001-5003:5000
+  

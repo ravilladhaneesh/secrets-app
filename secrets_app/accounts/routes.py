@@ -107,8 +107,9 @@ def verify():
     userId = int(current_user.get_id())
     user = User.query.get(userId)
     if user.is_oauth or user.is_verified:
+        next = request.args.get('next')
         flash("You are already verfied", "success")
-        return redirect(url_for("home"))
+        return redirect(next) if next else redirect(url_for("home"))
     form = EmailVerificationForm()
     if request.method == "POST":
         if form.validate_on_submit():

@@ -3,8 +3,21 @@
 <div class="container-sm account-container">
     <!-- Account Info Section -->
     <div class="account-info text-center">
-        <h3 class="display-5">{{ current_user.firstName }}</h3>
-        <p class="lead text-muted">{{ current_user.email }}</p>
+        <div class="username-header">
+            <h3 class="display-5">{{ current_user.firstName }}</h3>
+        </div>
+        <div class="email">
+            <div class="address">
+                <p class="lead text-muted">{{ current_user.email }}</p>
+            </div>
+            <div class="is-verified">
+                {% if current_user.is_verified %}
+                    <img src="{{url_for('static', filename='images/verified.png')}}" alt="verified email img" />
+                {% else %}
+                    <a class="verify" href="{{url_for('accounts.verify', next=url_for('accounts.account'))}}">Verify</a>
+                {% endif %}
+            </div>
+        </div>
     </div>
 
     <!-- Update Account Section -->

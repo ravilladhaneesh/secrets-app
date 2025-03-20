@@ -10,6 +10,33 @@
 }
 
 .input-fields .field-label{
-    /* background-color: red; */
     font-weight: 400;
+}
+
+
+.account-info .email {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.email .address {
+    margin-right: 10px;
+    align-self: center;
+    
+}
+
+.email .address p {
+    margin: 0%;
+}
+
+.email .is-verified img {
+    width: 20px;
+    height: auto;
+}
+
+.email .is-verified .verify{
+    text-decoration: none;
+    color: red;
 }
