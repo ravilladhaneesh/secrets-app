@@ -172,3 +172,4 @@ def edit_secret(secretId):
         #     print(nominee)
 
     return render_template('edit_secret.html', form=form, secret=secret, title="Edit Secret")
+

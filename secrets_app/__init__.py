@@ -52,3 +52,6 @@ from secrets_app.accounts.routes import accounts_bp
 from secrets_app import routes
 
 app.register_blueprint(accounts_bp)
+
+
+from secrets_app import schedule_email
