@@ -126,7 +126,7 @@ def delete_secret(secretId):
     if secret.user_id == user.id:
         db.session.delete(secret)
         db.session.commit()
-        flash(f"Deleted the secret {secret.name}", "success")
+        flash(f"Deleted the secret {secret.fieldName}", "success")
         return redirect(url_for('secrets'))
     flash("Invalid secret selected", "danger")
     return redirect(url_for('secrets'))
