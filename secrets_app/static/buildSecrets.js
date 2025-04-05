@@ -65,9 +65,12 @@ function showSecretDetails(secret) {
 
 }
 
+
 // Close the secret details popup
 function closePopup() {
     document.getElementById('overlay').style.display = 'none';
+    document.getElementById('details-popup').style.display = 'none';
+    document.getElementById('del-secret-consent').style.display = 'none';
 }
 
 function findFirstMissingValue(divObj){
@@ -83,3 +86,17 @@ function findFirstMissingValue(divObj){
     return len;
 }
 
+function showDeleteAlert(secret, deleteUrl){
+    document.getElementById('overlay').style.display = 'block';
+
+    document.getElementById('del-secret-name').innerText = `Secret Name: ${secret.fieldName}`;
+
+    document.getElementById('overlay').style.display = 'block';
+    var del_secret_consent_div = document.getElementById('del-secret-consent');
+    del_secret_consent_div.style.display = 'block';
+    var del_secret_btn = del_secret_consent_div.getElementsByClassName("del-secret-btn")[0];
+    console.log(secret);
+    del_secret_btn.addEventListener("click", ()=>{
+        window.location.href = deleteUrl;
+    });
+}
