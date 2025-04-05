@@ -69,6 +69,8 @@ function showSecretDetails(secret) {
 // Close the secret details popup
 function closePopup() {
     document.getElementById('overlay').style.display = 'none';
+    document.getElementById('details-popup').style.display = 'none';
+    document.getElementById('del-secret-consent').style.display = 'none';
 }
 
 function findFirstMissingValue(divObj){
