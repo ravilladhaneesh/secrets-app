@@ -5,6 +5,7 @@ body {
 }
 
 .alert-row{
+  margin-top: 0.4%;
   background-color: white;
 }
 
@@ -119,6 +120,10 @@ body {
   color: red;
 }
 
+.forgot-pwd-link{
+  text-decoration: none;
+  margin-left: 1%;
+}
 
 .secret-div {
   width: 75%;
