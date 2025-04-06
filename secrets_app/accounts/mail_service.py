@@ -5,6 +5,7 @@ import google.auth
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+from flask import url_for
 from secrets_app import app
 from secrets_app.model import User
 
@@ -125,3 +126,39 @@ def send_scheduled_email(userName, to, secret, credentials):
     print(f"An error occurred: {error}")
     send_message = None
   return send_message
+
+
+def send_reset_email(user):
+    token = user.get_reset_token()
+    rootUser = User.query.filter_by(email=ROOT_USER_EMAIL).first()
+    try:
+       from secrets_app.accounts.routes import get_credentials_for_user
+    except ImportError as err:
+       print("Import Error", err)
+       raise ImportError
+    credentials = get_credentials_for_user(rootUser.id)
+    service = build("gmail", "v1", credentials=credentials)
+    message = EmailMessage()
+
+    message["To"] = user.email
+    message["subject"] = 'Password Reset Request'
+    body = f'''To reset your password, visit the following link:
+{url_for('accounts.reset_token', token=token, _external=True)}
+
+If you did not make this request then simply ignore this email and no changes will be made.
+'''
+    message.set_content(body)
+    encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+
+    create_message = {"raw": encoded_message}
+    send_message = None
+    try:
+        send_message = (
+            service.users()
+            .messages()
+            .send(userId="me", body=create_message)
+            .execute()
+        )
+    except HttpError as err:
+        print(f"An error occurred: {err}")
+    return send_message

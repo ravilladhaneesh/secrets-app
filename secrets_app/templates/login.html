@@ -8,7 +8,7 @@
                     <fieldset>
                         
                         <legend class="border-bottom mb-3">
-                            Sign In with Mail 
+                            Sign In With Mail 
                         </legend>
                         
                         <div class="mb-1 form-group">
@@ -42,6 +42,9 @@
                     </fieldset>
                     <div class="form-group my-2">
                         {{ form.submit(class="btn btn-outline-info") }}
+                        <small class="text-muted ml-2">
+                            <a class="forgot-pwd-link" href="{{ url_for('accounts.reset_request') }}">Forgot Password?</a>
+                        </small>
                     </div>
                 </form>
             </div>

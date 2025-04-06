@@ -1,8 +1,10 @@
-from secrets_app import db, login_manager
+from secrets_app import db, login_manager, app
 from flask_login import UserMixin
 from sqlalchemy.orm import backref
 from sqlalchemy import PrimaryKeyConstraint
 from datetime import datetime
+from itsdangerous import URLSafeTimedSerializer as Serializer
+
 
 @login_manager.user_loader
 def user_loader(user_id):
@@ -27,6 +29,19 @@ class User(db.Model, UserMixin):
     required_login_per_days = db.Column(db.Integer, nullable=False, default=30)
     secret_salt = db.Column(db.String(30), nullable=False)
     oauth_refresh_token = db.Column(db.String(100), nullable=True)
+
+    def get_reset_token(self):
+        s = Serializer(app.config['SECRET_KEY'])
+        return s.dumps({'user_id': self.id})
+    
+    @staticmethod
+    def verify_reset_token(token, expires_sec=1800):
+        s = Serializer(app.config['SECRET_KEY'])
+        try:
+            user_id = s.loads(token, max_age=expires_sec)['user_id']
+        except:
+            return None
+        return User.query.get(user_id)
 
     def __repr__(self):
         return f"User('{self.firstName}', '{self.lastName}, '{self.email}')"
