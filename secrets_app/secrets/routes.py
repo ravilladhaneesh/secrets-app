@@ -1,8 +1,11 @@
-from flask import render_template, url_for, request, redirect, flash
-from secrets_app.forms import UserLoginForm, UserRegistrationForm, UserUpdateForm, AddSecretsForm, AddNomineeForm
-from secrets_app import app, db, bcrypt, login_manager
+from flask import render_template, url_for, request, redirect, flash, Blueprint
+from secrets_app.secrets.forms import AddSecretsForm, AddNomineeForm
+from secrets_app import db
 from secrets_app.model import User, Secret, Nominee
-from flask_login import login_user, current_user, logout_user, login_required
+from flask_login import current_user, login_required
+
+
+secrets_bp = Blueprint("secrets", __name__)
 
 
 dummy_secrets_data = [
@@ -12,18 +15,16 @@ dummy_secrets_data = [
 ]
 
 
-@app.route("/")
-def home():
-    return render_template("home.html", title='home')
-
-
-@app.route("/nominees")
+@secrets_bp.route("/nominees")
 @login_required
 def nominees():
     return render_template("nominee.html", title='nominee')
 
 
-# @app.route("/addSecrets", methods=["GET", "POST"])
+
+
+
+# @secrets_bp.route("/addSecrets", methods=["GET", "POST"])
 # @login_required
 # def addSecrets():
 #     userId = int(current_user.get_id())
@@ -38,11 +39,11 @@ def nominees():
 #     return render_template('secret.html', form=form)
 
 
-# @app.route("/secrets",methods=["GET", "POST"])
+# @secrets_bp.route("/secrets",methods=["GET", "POST"])
 # @login_required
 # def secrets():
 #     if not current_user.is_authenticated:
-#         return redirect(url_for('login'))
+#         return redirect(url_for('accounts.login'))
 #     userId = current_user.get_id()
 #     user = User.query.get(int(userId))
 #     form = AddSecretsForm()
@@ -65,7 +66,7 @@ def nominees():
 #         db.session.commit()
 #         flash("New Secret Added", "success")
 #         secrets_data.append(secret)
-#         return redirect(url_for('secrets'))
+#         return redirect(url_for('secrets.secrets'))
 #     secrets_data.extend(dummy_secrets_data)
 #     secrets = Secret.query.filter_by(user_id=int(userId))
 #     for secret in secrets:
@@ -77,11 +78,11 @@ def nominees():
 
 
 
-@app.route("/secrets", methods=["GET", "POST"])
+@secrets_bp.route("/secrets", methods=["GET", "POST"])
 @login_required
 def secrets():
     if not current_user.is_authenticated:
-        return redirect(url_for('login'))
+        return redirect(url_for('accounts.login'))
     
     userId = current_user.get_id()
     user = User.query.get(int(userId))
@@ -105,7 +106,7 @@ def secrets():
             db.session.add(secret)
             db.session.commit()
             flash("New Secret Added", "success")
-            return redirect(url_for('secrets'))
+            return redirect(url_for('secrets.secrets'))
         else:
             # If form is not valid, display the errors
             flash("Form contains errors, please correct them.", "danger")
@@ -117,7 +118,7 @@ def secrets():
     return render_template('secrets.html', secrets=secrets_dict, form=form, title="Secrets List")
 
 
-@app.route("/deleteSecret/<int:secretId>", methods=["GET", "POST"])
+@secrets_bp.route("/deleteSecret/<int:secretId>", methods=["GET", "POST"])
 @login_required
 def delete_secret(secretId):
     userId = current_user.get_id()
@@ -127,12 +128,12 @@ def delete_secret(secretId):
         db.session.delete(secret)
         db.session.commit()
         flash(f"Deleted the secret {secret.fieldName}", "success")
-        return redirect(url_for('secrets'))
+        return redirect(url_for('secrets.secrets'))
     flash("Invalid secret selected", "danger")
-    return redirect(url_for('secrets'))
+    return redirect(url_for('secrets.secrets'))
 
 
-@app.route("/editSecret/<int:secretId>", methods=["GET", "POST"])
+@secrets_bp.route("/editSecret/<int:secretId>", methods=["GET", "POST"])
 @login_required
 def edit_secret(secretId):
     secret = Secret.query.get_or_404(secretId)
@@ -157,7 +158,7 @@ def edit_secret(secretId):
         db.session.add(secret)
         db.session.commit()
         flash("Secret updated successfully", "success")
-        return redirect(url_for("secrets"))
+        return redirect(url_for("secrets.secrets"))
     if request.method == "GET":
         form.name.data = secret.fieldName
         # for nominee in secret.nominees:

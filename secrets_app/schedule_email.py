@@ -2,14 +2,14 @@ import threading
 import time
 import schedule
 from datetime import datetime, date
-from secrets_app import app
+from flask import current_app
 from secrets_app.model import User
 from secrets_app.accounts.routes import get_credentials_for_user
 from secrets_app.accounts.mail_service import send_scheduled_email
 
 def send_email_to_user(userId):
     print("HI")
-    with app.app_context():
+    with current_app.app_context():
         user = User.query.get(userId)
         secrets = user.secrets
         credentials = get_credentials_for_user(user.id)
@@ -31,7 +31,7 @@ def create_user_thread(user, userName):
 
 def schedule_email():
     print("hello")
-    with app.app_context():
+    with current_app.app_context():
         users = User.query.all()
         for user in users:
             print(user)
