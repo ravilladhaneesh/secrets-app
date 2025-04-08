@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
 from secrets_app.model import User
-from wtforms import StringField, PasswordField, SubmitField, IntegerField, FormField, FieldList, EmailField
+from wtforms import StringField, PasswordField, SubmitField, IntegerField
 from wtforms.validators import InputRequired, DataRequired, Length, EqualTo, Email, ValidationError
+
 
 class UserRegistrationForm(FlaskForm):
     firstName = StringField('First Name', validators=[DataRequired(), Length(min=3, max=15)])
@@ -56,19 +57,6 @@ class UserUpdateForm(FlaskForm):
         if not (5 <= required_login_per_days.data <= 30) :
             raise ValidationError("Login Required Date should be greater than 5 days and less than 30 days")
         
-
-class AddNomineeForm(FlaskForm):
-    class Meta:
-        csrf = False
-    name = StringField('Nominee Name', validators=[DataRequired()])
-    email_id = EmailField('Email', validators=[DataRequired()])        
-    
-
-class AddSecretsForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired()])
-    secret = StringField("Secret", validators=[DataRequired()])
-    nominees = FieldList(FormField(AddNomineeForm), min_entries=0)
-    submit = SubmitField("Submit")
 
 
 class EmailVerificationForm(FlaskForm):

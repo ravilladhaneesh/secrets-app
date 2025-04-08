@@ -1,5 +1,7 @@
-from secrets_app import app
+from secrets_app import create_app
 import os
+
+app = create_app()
 
 if __name__ == "__main__":
     os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'

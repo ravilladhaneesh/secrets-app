@@ -1,19 +1,16 @@
 import random
 from datetime import datetime, timedelta
-import secrets
 from cryptography.fernet import Fernet
-from flask import render_template, url_for, request, redirect, flash, Blueprint, session, abort
-from secrets_app.forms import (UserLoginForm, UserRegistrationForm, UserUpdateForm, AddSecretsForm
+from flask import current_app, render_template, url_for, request, redirect, flash, Blueprint, session, abort
+from secrets_app.accounts.forms import (UserLoginForm, UserRegistrationForm, UserUpdateForm
                                , EmailVerificationForm, ResetPasswordForm, RequestResetForm)
-from secrets_app import app, db, bcrypt, login_manager, mail
-from secrets_app.model import User, Secret, Nominee
+from secrets_app.secrets.forms import AddSecretsForm
+from secrets_app import db, bcrypt
+from secrets_app.model import User
 from flask_login import login_user, current_user, logout_user, login_required
-from flask_mail import Message
-from urllib.parse import urlencode
 import requests
 from  google.oauth2.credentials import Credentials
 import google_auth_oauthlib.flow
-import googleapiclient.discovery
 import google.auth.transport.requests
 from secrets_app.accounts.google_oauth_creds import get_credentials
 from secrets_app.accounts.mail_service import gmail_send_message, send_otp_from_root_account, send_reset_email
@@ -59,7 +56,7 @@ def credentials_to_dict(credentials):
 @accounts_bp.route("/register", methods=["GET", "POST"])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('home'))
+        return redirect(url_for('main.home'))
     form = UserRegistrationForm()
     if request.method == "POST":
         print(form.validate_on_submit() == True)
@@ -110,7 +107,7 @@ def verify():
     if user.is_oauth or user.is_verified:
         next = request.args.get('next')
         flash("You are already verfied", "success")
-        return redirect(next) if next else redirect(url_for("home"))
+        return redirect(next) if next else redirect(url_for("main.home"))
     form = EmailVerificationForm()
     if request.method == "POST":
         if form.validate_on_submit():
@@ -124,7 +121,7 @@ def verify():
                     user.otp = None
                     db.session.commit()
                     flash("Email Verified.", "success")
-                    return redirect(url_for("home"))
+                    return redirect(url_for("main.home"))
                 elif user.otp != otp and user.otp_attempts < 3:
                     print(user.otp_attempts)
                     user.otp_attempts += 1
@@ -147,7 +144,7 @@ def verify():
 @accounts_bp.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('home'))
+        return redirect(url_for('main.home'))
     message = 'Login failed. Please check username and password'
     form = UserLoginForm()
     if request.method == "POST":
@@ -159,7 +156,7 @@ def login():
                 login_user(user, remember=False)
                 next = request.args.get("next")
                 flash(f'Logged In as {user.firstName}', 'success')
-                return redirect(next) if next else redirect(url_for('home'))
+                return redirect(next) if next else redirect(url_for('main.home'))
             elif user and user.is_oauth:
                 message = "Please choose a valid login method"
         flash(message, 'danger')
@@ -206,9 +203,9 @@ def account():
 @accounts_bp.route('/authorize/<provider>')
 def oauth2_authorize(provider):
     if not current_user.is_anonymous:
-        return redirect(url_for('home'))
+        return redirect(url_for('main.home'))
 
-    # provider_data = app.config['OAUTH2_PROVIDERS'].get(provider)
+    # provider_data = current_app.config['OAUTH2_PROVIDERS'].get(provider)
     # redirect_uri = url_for('accounts.oauth2_callback', provider=provider, _external=True)
     # scope = 
 
@@ -237,9 +234,9 @@ def oauth2_authorize(provider):
 def oauth2_callback(provider):
     print("HELLO")
     if not current_user.is_anonymous:
-        return redirect(url_for('home'))
+        return redirect(url_for('main.home'))
 
-    provider_data = app.config['OAUTH2_PROVIDERS'].get(provider)
+    provider_data = current_app.config['OAUTH2_PROVIDERS'].get(provider)
     # if provider_data is None:
     #     abort(404)
 
@@ -248,7 +245,7 @@ def oauth2_callback(provider):
     #     for k, v in request.args.items():
     #         if k.startswith('error'):
     #             flash(f'{k}: {v}')
-    #     return redirect(url_for('home'))
+    #     return redirect(url_for('main.home'))
     # # make sure that the state parameter matches the one we created in the
     # # authorization request
     # if request.args['state'] != session.get('oauth2_state'):
@@ -304,7 +301,7 @@ def oauth2_callback(provider):
     # db.session.commit()
     # login_user(user)
     # flash(f"Logged In as {user.firstName}", "success")
-    # return redirect(url_for('home'))
+    # return redirect(url_for('main.home'))
 
     state = session['state']
 
@@ -355,7 +352,7 @@ def oauth2_callback(provider):
             flash(f"Account created for email: {email}", "success")
         else:
             flash("Unable to create new account for user.Please check and delete the application from google's third party application and retry.", "danger")
-            return redirect(url_for("home"))
+            return redirect(url_for("main.home"))
     else:
         if not user.is_oauth:
             user.is_oauth = True
@@ -368,7 +365,7 @@ def oauth2_callback(provider):
     db.session.commit()
     login_user(user)
     flash(f"Logged In as {user.firstName}", "success")
-    return redirect(url_for('home'))
+    return redirect(url_for('main.home'))
 
 
 
@@ -398,7 +395,7 @@ def verify_send_message(provider):
         return redirect(url_for("accounts.login"))
     
 
-    provider_data = app.config['OAUTH2_PROVIDERS'].get(provider)
+    provider_data = current_app.config['OAUTH2_PROVIDERS'].get(provider)
     if provider_data is None:
         abort(404)
 
@@ -407,7 +404,7 @@ def verify_send_message(provider):
         for k, v in request.args.items():
             if k.startswith('error'):
                 flash(f'{k}: {v}')
-        return redirect(url_for('home'))
+        return redirect(url_for('main.home'))
     state = session['state']
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         CLIENT_SECRETS_FILE, scopes=SCOPES["sendMail"], state=state)
@@ -446,7 +443,7 @@ def verify_send_message(provider):
                 flash("Unable to create new account for user.Please check and delete the application from google's third party application and retry.", "danger")
         else:
             flash("Please authenticate with the registered email ID", "danger")
-    return redirect(url_for("home"))
+    return redirect(url_for("main.home"))
 
 
 
@@ -465,14 +462,14 @@ def verify_send_message(provider):
         
 #     print(response)
 #     print(response.json())
-#     return redirect(url_for("home"))
+#     return redirect(url_for("main.home"))
 
 
 
 @accounts_bp.route("/reset_password", methods=['GET', 'POST'])
 def reset_request():
     if current_user.is_authenticated:
-        return redirect(url_for('home'))
+        return redirect(url_for('main.home'))
     form = RequestResetForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -485,7 +482,7 @@ def reset_request():
 @accounts_bp.route("/reset_password/<token>", methods=['GET', 'POST'])
 def reset_token(token):
     if current_user.is_authenticated:
-        return redirect(url_for('home'))
+        return redirect(url_for('main.home'))
     user = User.verify_reset_token(token)
     if user is None:
         flash('That is an invalid or expired token', 'warning')
@@ -543,14 +540,14 @@ def callback2():
     credentials = flow.credentials
     print(credentials.to_json())
     #get_credentials(request, state)
-    return redirect(url_for("home"))
+    return redirect(url_for("main.home"))
 
 
 # @accounts_bp.route("/t")
 # @login_required
 # def t():
 #     credentials = get_credentials_for_user(int(current_user.get_id()))
-#     return redirect(url_for("home"))
+#     return redirect(url_for("main.home"))
 
 
 @accounts_bp.route("/scopes")
@@ -562,7 +559,7 @@ def scopes():
     print(response.json())
     flash(response.json(), "success")
     # message = gmail_send_message(credentials=credentials)
-    return redirect(url_for("home"))
+    return redirect(url_for("main.home"))
 
 
 

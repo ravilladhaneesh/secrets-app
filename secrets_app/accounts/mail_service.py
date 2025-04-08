@@ -5,12 +5,9 @@ import google.auth
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from flask import url_for
-from secrets_app import app
+from flask import url_for, current_app
 from secrets_app.model import User
 
-
-ROOT_USER_EMAIL = app.config["ROOT_EMAIL"]
 
 def gmail_send_message(credentials):
   """Create and send an email message
@@ -57,7 +54,7 @@ def gmail_send_message(credentials):
 
 
 def send_otp_from_root_account(otp, email_to):
-    rootUser = User.query.filter_by(email=ROOT_USER_EMAIL).first()
+    rootUser = User.query.filter_by(email=current_app.config["ROOT_EMAIL"]).first()
     try:
        from secrets_app.accounts.routes import get_credentials_for_user
     except ImportError as err:
@@ -130,7 +127,7 @@ def send_scheduled_email(userName, to, secret, credentials):
 
 def send_reset_email(user):
     token = user.get_reset_token()
-    rootUser = User.query.filter_by(email=ROOT_USER_EMAIL).first()
+    rootUser = User.query.filter_by(email=current_app.config["ROOT_EMAIL"]).first()
     try:
        from secrets_app.accounts.routes import get_credentials_for_user
     except ImportError as err:

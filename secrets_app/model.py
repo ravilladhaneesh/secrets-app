@@ -1,4 +1,5 @@
-from secrets_app import db, login_manager, app
+from flask import current_app
+from secrets_app import db, login_manager
 from flask_login import UserMixin
 from sqlalchemy.orm import backref
 from sqlalchemy import PrimaryKeyConstraint
@@ -31,12 +32,12 @@ class User(db.Model, UserMixin):
     oauth_refresh_token = db.Column(db.String(100), nullable=True)
 
     def get_reset_token(self):
-        s = Serializer(app.config['SECRET_KEY'])
+        s = Serializer(current_app.config['SECRET_KEY'])
         return s.dumps({'user_id': self.id})
     
     @staticmethod
     def verify_reset_token(token, expires_sec=1800):
-        s = Serializer(app.config['SECRET_KEY'])
+        s = Serializer(current_app.config['SECRET_KEY'])
         try:
             user_id = s.loads(token, max_age=expires_sec)['user_id']
         except:
