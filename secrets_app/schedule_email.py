@@ -2,14 +2,15 @@ import threading
 import time
 import schedule
 from datetime import datetime, date
-from flask import current_app
 from secrets_app.model import User
 from secrets_app.accounts.routes import get_credentials_for_user
 from secrets_app.accounts.mail_service import send_scheduled_email
 
+app = None
+
 def send_email_to_user(userId):
     print("HI")
-    with current_app.app_context():
+    with app.app_context():
         user = User.query.get(userId)
         secrets = user.secrets
         credentials = get_credentials_for_user(user.id)
@@ -31,20 +32,21 @@ def create_user_thread(user, userName):
 
 def schedule_email():
     print("hello")
-    with current_app.app_context():
+    with app.app_context():
         users = User.query.all()
         for user in users:
             print(user)
-            if (date.today() - user.last_login).days > user.required_login_per_days:
-                if user.send_email_authorized:
+            if True or (date.today() - user.last_login).days > user.required_login_per_days:
+                print(user.send_email_authorized)
+                if True or user.send_email_authorized:
                     print("Authorized")
                     create_user_thread(user, user.firstName)
 
 
-schedule.every().day.at("09:52").do(schedule_email)
+schedule.every().day.at("08:04").do(schedule_email)
 
 
-def run_continuously(interval=1):
+def run_continuously(current_app, interval=1):
     """Continuously run, while executing pending jobs at each
     elapsed time interval.
     @return cease_continuous_run: threading. Event which can
@@ -55,6 +57,8 @@ def run_continuously(interval=1):
     interval of one hour then your job won't be run 60 times
     at each interval but only once.
     """
+    global app
+    app = current_app
     cease_continuous_run = threading.Event()
 
     class ScheduleThread(threading.Thread):
@@ -77,4 +81,4 @@ def run_continuously(interval=1):
     continuous_thread.start()
     return cease_continuous_run
 
-run_continuously(10)
+# run_continuously(10)

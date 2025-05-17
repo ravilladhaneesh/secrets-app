@@ -1,4 +1,5 @@
 import random
+import json
 from datetime import datetime, timedelta
 from cryptography.fernet import Fernet
 from flask import current_app, render_template, url_for, request, redirect, flash, Blueprint, session, abort
@@ -50,6 +51,7 @@ def credentials_to_dict(credentials):
           'token_uri': credentials.token_uri,
           'client_id': credentials.client_id,
           'client_secret': credentials.client_secret,
+          'scopes': credentials.scopes,
           'granted_scopes': credentials.granted_scopes}
 
 
@@ -208,9 +210,8 @@ def oauth2_authorize(provider):
     # provider_data = current_app.config['OAUTH2_PROVIDERS'].get(provider)
     # redirect_uri = url_for('accounts.oauth2_callback', provider=provider, _external=True)
     # scope = 
-
-    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-      CLIENT_SECRETS_FILE, scopes=SCOPES["userInfo"])
+    flow = google_auth_oauthlib.flow.Flow.from_client_config(
+      load_client_secrets_file(CLIENT_SECRETS_FILE), scopes=SCOPES["userInfo"])
     flow.redirect_uri = url_for('accounts.oauth2_callback', provider=provider, _external=True)
     authorization_url, state = flow.authorization_url(
         # Enable offline access so that you can refresh an access token without
@@ -305,8 +306,8 @@ def oauth2_callback(provider):
 
     state = session['state']
 
-    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        CLIENT_SECRETS_FILE, scopes=SCOPES["userInfo"], state=state)
+    flow = google_auth_oauthlib.flow.Flow.from_client_config(
+        load_client_secrets_file(CLIENT_SECRETS_FILE), scopes=SCOPES["userInfo"], state=state)
     flow.redirect_uri = url_for('accounts.oauth2_callback', provider=provider, _external=True)
 
     # Use the authorization server's response to fetch the OAuth 2.0 tokens.
@@ -375,8 +376,8 @@ def authorize_send_message(provider):
     if current_user.is_anonymous:
         return redirect(url_for("accounts.login"))
 
-    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-      CLIENT_SECRETS_FILE, scopes=[SCOPES["userInfo"], SCOPES["sendMail"]])
+    flow = google_auth_oauthlib.flow.Flow.from_client_config(
+      load_client_secrets_file(CLIENT_SECRETS_FILE), scopes=[SCOPES["userInfo"], SCOPES["sendMail"]])
     flow.redirect_uri = url_for('accounts.verify_send_message', provider=provider, _external=True)
 
     authorization_url, state = flow.authorization_url(
@@ -406,20 +407,19 @@ def verify_send_message(provider):
                 flash(f'{k}: {v}')
         return redirect(url_for('main.home'))
     state = session['state']
-    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        CLIENT_SECRETS_FILE, scopes=SCOPES["sendMail"], state=state)
+    flow = google_auth_oauthlib.flow.Flow.from_client_config(
+        load_client_secrets_file(CLIENT_SECRETS_FILE), scopes=SCOPES["sendMail"], state=state)
     flow.redirect_uri = url_for('accounts.verify_send_message', provider=provider, _external=True)
 
     authorization_response = request.url
     flow.fetch_token(authorization_response=authorization_response)
-
     # Store credentials in the session.
     # ACTION ITEM: In a production app, you likely want to save these
     #              credentials in a persistent database instead.
     credentials = flow.credentials
     credentials = credentials_to_dict(credentials)
     print(credentials)
-    
+
     if provider_data["scopes"]["sendmessage"] in credentials["granted_scopes"]:
         response = requests.get(provider_data['userinfo']['url'], headers={
         'Authorization': 'Bearer ' + credentials["access_token"],
@@ -510,8 +510,8 @@ def test2():
     'https://www.googleapis.com/auth/userinfo.profile',
     # Add other requested scopes.
     ]
-    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-      CLIENT_SECRETS_FILE, scopes=SCOPES)
+    flow = google_auth_oauthlib.flow.Flow.from_client_config(
+      load_client_secrets_file(CLIENT_SECRETS_FILE), scopes=SCOPES)
     
     flow.redirect_uri = url_for('accounts.callback2', _external=True)
 
@@ -532,8 +532,8 @@ def callback2():
     'https://www.googleapis.com/auth/userinfo.profile',
     # Add other requested scopes.
     ]
-    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        CLIENT_SECRETS_FILE, scopes=SCOPES, state=state)
+    flow = google_auth_oauthlib.flow.Flow.from_client_config(
+        load_client_secrets_file(CLIENT_SECRETS_FILE), scopes=SCOPES, state=state)
     authorization_response = request.url
     flow.redirect_uri = "http://localhost:5000/callback2"
     flow.fetch_token(authorization_response=authorization_response)
@@ -577,10 +577,22 @@ def decrypt(key, token):
     return None
 
 
+def load_client_secrets_file(filename):
+
+    """Load the client secrets file and return the client config."""
+    with open(filename, 'r') as f:
+        client_config = json.load(f)
+    return client_config
+
+
+
+
 def get_credentials_for_user(UserId):
     user = User.query.get(UserId)
-    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-      CLIENT_SECRETS_FILE, scopes=SCOPES)
+    # flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+    #   CLIENT_SECRETS_FILE, scopes=SCOPES)
+    client_config = load_client_secrets_file(CLIENT_SECRETS_FILE)
+    flow = google_auth_oauthlib.flow.Flow.from_client_config(client_config, scopes=SCOPES)
     refresh_token = decrypt(user.secret_salt, user.oauth_refresh_token)
     # print(dir(flow))
     # print(refresh_token)

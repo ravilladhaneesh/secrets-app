@@ -17,6 +17,7 @@ bcrypt = Bcrypt()
 
 login_manager = LoginManager()
 login_manager.login_view = 'accounts.login'
+login_manager.login_message_category = 'info'
 
 
 def create_app(config_class=Config):
@@ -39,8 +40,9 @@ def create_app(config_class=Config):
     app.register_blueprint(main_bp)
     app.register_blueprint(errors)
 
+    
     from secrets_app import schedule_email
-
+    schedule_email.run_continuously(app, interval=1)
 
     return app
 
