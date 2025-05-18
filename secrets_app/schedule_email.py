@@ -30,7 +30,7 @@ def create_user_thread(user, userName):
     thread.start()
 
 
-def schedule_email():
+def schedule_email(app):
     print("hello")
     with app.app_context():
         users = User.query.all()

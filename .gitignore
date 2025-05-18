@@ -6,3 +6,4 @@ migrations/*
 .env
 client_secret.json
 .vscode
+celerybeat-*

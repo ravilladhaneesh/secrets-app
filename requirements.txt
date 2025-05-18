@@ -16,3 +16,6 @@ cryptography
 flask-migrate
 schedule
 itsdangerous
+gunicorn
+celery
+redis
