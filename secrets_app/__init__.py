@@ -59,8 +59,8 @@ def create_app(config_class=Config):
     
     app.config.from_mapping(
         CELERY=dict(
-            broker_url="redis://localhost",
-            result_backend="redis://localhost",
+            broker_url=config_class.CELERY_BROKER_URL,
+            result_backend=config_class.CELERY_RESULT_BACKEND,
             task_ignore_result=True,
         ),
     )

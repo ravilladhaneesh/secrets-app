@@ -83,7 +83,7 @@ def register():
                     is_verified=False,
                     send_email_authorized=False)
                 
-                # send_otp_from_root_account(otp, form.email.data)
+                send_otp_from_root_account(otp, form.email.data)
 
                 db.session.add(user)
                 db.session.commit()
@@ -212,14 +212,18 @@ def oauth2_authorize(provider):
     # scope = 
     flow = google_auth_oauthlib.flow.Flow.from_client_config(
       load_client_secrets_file(CLIENT_SECRETS_FILE), scopes=SCOPES["userInfo"])
+    print("HELLO")
+
     flow.redirect_uri = url_for('accounts.oauth2_callback', provider=provider, _external=True)
+    print("flow.redirect_uri", flow.redirect_uri)
+    print("url", url_for('accounts.oauth2_callback', provider=provider, _external=True))
     authorization_url, state = flow.authorization_url(
         # Enable offline access so that you can refresh an access token without
         # re-prompting the user for permission. Recommended for web server apps.
         access_type='offline',
         # Enable incremental authorization. Recommended as a best practice.
         include_granted_scopes='true')
-    
+    print("HELLO")
     # Store the state so the callback can verify the auth server response.
     session['state'] = state
 
@@ -227,6 +231,7 @@ def oauth2_authorize(provider):
 
     # redirect the user to the OAuth2 provider authorization URL
     # return redirect(provider_data['authorize_url'] + '?' + qs)
+    print("state", state, "authorization_url", authorization_url)
     return redirect(authorization_url)
 
 
@@ -303,7 +308,8 @@ def oauth2_callback(provider):
     # login_user(user)
     # flash(f"Logged In as {user.firstName}", "success")
     # return redirect(url_for('main.home'))
-
+    for i in session:
+        print(i, session[i])
     state = session['state']
 
     flow = google_auth_oauthlib.flow.Flow.from_client_config(
@@ -312,6 +318,7 @@ def oauth2_callback(provider):
 
     # Use the authorization server's response to fetch the OAuth 2.0 tokens.
     authorization_response = request.url
+    print(authorization_response, "authorization_response")
     flow.fetch_token(authorization_response=authorization_response)
 
     # Store credentials in the session.
