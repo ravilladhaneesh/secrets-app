@@ -13,6 +13,8 @@ ENV PYTHONUNBUFFERED=1
 COPY requirements.txt .
 RUN python -m pip install -r requirements.txt
 
+RUN rm -f requirements.txt
+
 WORKDIR /app
 COPY . /app
 
@@ -23,5 +25,5 @@ COPY . /app
 
 # CMD ["echo", "hello"]
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
-# CMD ["python", "run.py"]
+#CMD ["python", "run.py"]
 CMD ["gunicorn", "-b", "0.0.0.0:5000", "run:app", "-w", "3"]

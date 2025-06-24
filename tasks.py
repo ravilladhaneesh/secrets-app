@@ -28,7 +28,7 @@ celery_app.conf.beat_schedule = {
 }
 
 @celery_app.task
-def send_email_to_user(userId):
+def email_notification(userId):
     with flask_app.app_context():
         user = User.query.get(userId)
         secrets = user.secrets
@@ -47,4 +47,4 @@ def schedule_email():
         for user in users:
             if (date.today() - user.last_login).days > user.required_login_per_days:
                 if user.send_email_authorized:
-                    send_email_to_user.delay(user.id)
+                    email_notification.delay(user.id)
