@@ -8,6 +8,8 @@ services:
       - "5000"
     networks:
       - my_network
+    volumes:
+      - db-volume:/app/instance/
   
   nginx:
     image: nginx:latest
@@ -33,6 +35,8 @@ services:
       - redis
     networks:
       - my_network
+    volumes:
+      - db-volume:/app/instance/
   
   celery-beat:
     build:
@@ -47,6 +51,8 @@ services:
       - redis
     networks:
       - my_network
+    volumes:
+      - db-volume:/app/instance/
   
   redis:
     image: redis:latest
@@ -59,3 +65,6 @@ services:
 
 networks:
   my_network:
+
+volumes:
+  db-volume:
