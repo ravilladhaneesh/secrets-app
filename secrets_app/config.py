@@ -14,21 +14,26 @@ class Config:
     ROOT_EMAIL = os.environ.get("ROOT_EMAIL")
 
     GOOGLE_LOGIN_REDIRECT_SCHEME = 'https'
+    print(os.getenv("GOOGLE_CLIENT_SECRETS"),"-->\n\n\n")
     OAUTH2_PROVIDERS = {
             # Google OAuth 2.0 documentation:
             # https://developers.google.com/identity/protocols/oauth2/web-server#httprest
-                    'google': {
-                    'client_id': os.getenv("GOOGLE_CLIENT_ID"),
-                    'client_secret': os.getenv("GOOGLE_CLIENT_SECRETS") ,
-                    'authorize_url': 'https://accounts.google.com/o/oauth2/auth',
-                    'token_url': 'https://accounts.google.com/o/oauth2/token',
-                    'userinfo': {
-                        'url': 'https://www.googleapis.com/oauth2/v3/userinfo',
-                        'email': lambda json: json['email'],
-                    },
-                    'scopes': {
-                                "userinfo": 'https://www.googleapis.com/auth/userinfo.email',
-                                "sendmessage": 'https://www.googleapis.com/auth/gmail.send'
-                            }
+            'google': {
+                    'web': {
+                        'client_id': os.getenv("GOOGLE_CLIENT_ID"),
+                        'client_secret': os.getenv("GOOGLE_CLIENT_SECRETS") ,
+                        "project_id": "secure-secrets",
+                        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                        "token_uri": "https://oauth2.googleapis.com/token",
+                        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                        'userinfo': {
+                            'url': 'https://www.googleapis.com/oauth2/v3/userinfo',
+                            'email': lambda json: json['email'],
+                        },
+                        'scopes': {
+                                    "userinfo": 'https://www.googleapis.com/auth/userinfo.email',
+                                    "sendmessage": 'https://www.googleapis.com/auth/gmail.send'
+                                }
+                    }
                 }
             }
