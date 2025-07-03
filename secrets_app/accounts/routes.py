@@ -15,35 +15,15 @@ import google_auth_oauthlib.flow
 import google.auth.transport.requests
 from secrets_app.accounts.google_oauth_creds import get_credentials
 from secrets_app.accounts.mail_service import gmail_send_message, send_otp_from_root_account, send_reset_email
-
+from secrets_app.accounts.utils import get_client_secrets, encrypt, decrypt, get_credentials_for_user
 
 accounts_bp = Blueprint("accounts", __name__)
 
-CLIENT_SECRETS_FILE = "client_secret.json"
-
-SCOPES = {"userInfo": 'https://www.googleapis.com/auth/userinfo.email',
-          "sendMail": 'https://www.googleapis.com/auth/gmail.send'}
-
-
-# def build_query_encoder(provider_data, redirect_uri, scope):
-#     if provider_data is None:
-#         abort(404)
-
-#     # generate a random string for the state parameter
-#     session['oauth2_state'] = secrets.token_urlsafe(16)
-
-#     # create a query string with all the OAuth2 parameters
-#     qs = urlencode({
-#         'client_id': provider_data['client_id'],
-#         'redirect_uri': redirect_uri,
-#         'response_type': 'code',
-#         'scope': scope,
-#         'state': session['oauth2_state'],
-#     })
-
-#     return qs
-
-
+SCOPES = {
+    "userinfo": 'https://www.googleapis.com/auth/userinfo.email',
+    "sendmessage": 'https://www.googleapis.com/auth/gmail.send',
+    "userinfo_profile": 'https://www.googleapis.com/auth/userinfo.profile'
+}
 
 def credentials_to_dict(credentials):
   return {'access_token': credentials.token,
@@ -207,31 +187,23 @@ def oauth2_authorize(provider):
     if not current_user.is_anonymous:
         return redirect(url_for('main.home'))
 
-    # provider_data = current_app.config['OAUTH2_PROVIDERS'].get(provider)
-    # redirect_uri = url_for('accounts.oauth2_callback', provider=provider, _external=True)
-    # scope = 
+    client_config = get_client_secrets(provider)
     flow = google_auth_oauthlib.flow.Flow.from_client_config(
-      load_client_secrets_file(CLIENT_SECRETS_FILE), scopes=SCOPES["userInfo"])
-    print("HELLO")
+      client_config=client_config, scopes=SCOPES["userinfo"])
 
     flow.redirect_uri = url_for('accounts.oauth2_callback', provider=provider, _external=True)
-    print("flow.redirect_uri", flow.redirect_uri)
-    print("url", url_for('accounts.oauth2_callback', provider=provider, _external=True))
     authorization_url, state = flow.authorization_url(
         # Enable offline access so that you can refresh an access token without
         # re-prompting the user for permission. Recommended for web server apps.
         access_type='offline',
         # Enable incremental authorization. Recommended as a best practice.
         include_granted_scopes='true')
-    print("HELLO")
     # Store the state so the callback can verify the auth server response.
     session['state'] = state
 
     # qs = build_query_encoder(provider_data, redirect_uri, scope)
 
     # redirect the user to the OAuth2 provider authorization URL
-    # return redirect(provider_data['authorize_url'] + '?' + qs)
-    print("state", state, "authorization_url", authorization_url)
     return redirect(authorization_url)
 
 
@@ -242,78 +214,13 @@ def oauth2_callback(provider):
     if not current_user.is_anonymous:
         return redirect(url_for('main.home'))
 
-    provider_data = current_app.config['OAUTH2_PROVIDERS'].get(provider)
-    # if provider_data is None:
-    #     abort(404)
-
-    # # if there was an authentication error, flash the error messages and exit
-    # if 'error' in request.args:
-    #     for k, v in request.args.items():
-    #         if k.startswith('error'):
-    #             flash(f'{k}: {v}')
-    #     return redirect(url_for('main.home'))
-    # # make sure that the state parameter matches the one we created in the
-    # # authorization request
-    # if request.args['state'] != session.get('oauth2_state'):
-    #     abort(401)
-
-    # # make sure that the authorization code is present
-    # if 'code' not in request.args:
-    #     abort(401)
-    # # exchange the authorization code for an access token
-    # response = requests.post(provider_data['token_url'], data={
-    #     'client_id': provider_data['client_id'],
-    #     'client_secret': provider_data['client_secret'],
-    #     'code': request.args['code'],
-    #     'grant_type': 'authorization_code',
-    #     'access_type': 'offline',
-    #     'prompt': 'consent',
-    #     'redirect_uri': url_for('accounts.oauth2_callback', provider=provider,
-    #                             _external=True),
-    # }, headers={'Accept': 'application/json'})
-
-    # if response.status_code != 200:
-    #     abort(401)
-    # print(response.json())
-    # oauth2_token = response.json().get('access_token')
-
-    # if not oauth2_token:
-    #     abort(401)
-
-    # # use the access token to get the user's email address
-    # response = requests.get(provider_data['userinfo']['url'], headers={
-    #     'Authorization': 'Bearer ' + oauth2_token,
-    #     'Accept': 'application/json',
-    # })
-    # if response.status_code != 200:
-    #     abort(401)
-    # email = provider_data['userinfo']['email'](response.json())
-
-    # # find or create the user in the database
-    # user = User.query.filter_by(email=email).first()
-    # if user is None:
-    #     user = User(
-    #         firstName=email.split('@')[0],
-    #         email=email,
-    #         is_oauth=True,
-    #         is_verified=True,
-    #         send_email_authorized=False
-    #     )
-    #     db.session.add(user)
-    #     flash(f"Account created for email: {email}", "success")
-
-    # # log the user in
-    # user.last_login = datetime.now()
-    # db.session.commit()
-    # login_user(user)
-    # flash(f"Logged In as {user.firstName}", "success")
-    # return redirect(url_for('main.home'))
+    client_config = get_client_secrets(provider)
     for i in session:
         print(i, session[i])
     state = session['state']
 
     flow = google_auth_oauthlib.flow.Flow.from_client_config(
-        load_client_secrets_file(CLIENT_SECRETS_FILE), scopes=SCOPES["userInfo"], state=state)
+        client_config=client_config, scopes=SCOPES["userinfo"], state=state)
     flow.redirect_uri = url_for('accounts.oauth2_callback', provider=provider, _external=True)
 
     # Use the authorization server's response to fetch the OAuth 2.0 tokens.
@@ -326,20 +233,19 @@ def oauth2_callback(provider):
     #              credentials in a persistent database instead.
     credentials = flow.credentials
     credentials = credentials_to_dict(credentials)
-    # print(credentials)
 
     if 'access_token' not in credentials:
         abort(401)
     
     
-    response = requests.get(provider_data['userinfo']['url'], headers={
+    response = requests.get(client_config['web']['userinfo']['url'], headers={
         'Authorization': 'Bearer ' + credentials["access_token"],
         'Accept': 'application/json',
     })
 
     if response.status_code != 200:
         abort(401)
-    email = provider_data['userinfo']['email'](response.json())
+    email = client_config['web']['userinfo']['email'](response.json())
     print(credentials)
     # find or create the user in the database
     user = User.query.filter_by(email=email).first()
@@ -383,8 +289,9 @@ def authorize_send_message(provider):
     if current_user.is_anonymous:
         return redirect(url_for("accounts.login"))
 
+    client_config = get_client_secrets(provider)
     flow = google_auth_oauthlib.flow.Flow.from_client_config(
-      load_client_secrets_file(CLIENT_SECRETS_FILE), scopes=[SCOPES["userInfo"], SCOPES["sendMail"]])
+      client_config=client_config, scopes=SCOPES["sendmessage"])
     flow.redirect_uri = url_for('accounts.verify_send_message', provider=provider, _external=True)
 
     authorization_url, state = flow.authorization_url(
@@ -392,7 +299,6 @@ def authorize_send_message(provider):
         include_granted_scopes='true')
 
     session['state'] = state
-    print("\n\n HELLO \n\n")
     return redirect(authorization_url)
 
 
@@ -403,8 +309,8 @@ def verify_send_message(provider):
         return redirect(url_for("accounts.login"))
     
 
-    provider_data = current_app.config['OAUTH2_PROVIDERS'].get(provider)
-    if provider_data is None:
+    client_config = get_client_secrets(provider)
+    if client_config is None:
         abort(404)
 
     # if there was an authentication error, flash the error messages and exit
@@ -415,7 +321,7 @@ def verify_send_message(provider):
         return redirect(url_for('main.home'))
     state = session['state']
     flow = google_auth_oauthlib.flow.Flow.from_client_config(
-        load_client_secrets_file(CLIENT_SECRETS_FILE), scopes=SCOPES["sendMail"], state=state)
+        client_config=client_config, scopes=SCOPES["sendmessage"], state=state)
     flow.redirect_uri = url_for('accounts.verify_send_message', provider=provider, _external=True)
 
     authorization_response = request.url
@@ -427,15 +333,15 @@ def verify_send_message(provider):
     credentials = credentials_to_dict(credentials)
     print(credentials)
 
-    if provider_data["scopes"]["sendmessage"] in credentials["granted_scopes"]:
-        response = requests.get(provider_data['userinfo']['url'], headers={
+    if SCOPES["sendmessage"] in credentials["granted_scopes"]:
+        response = requests.get(client_config['web']['userinfo']['url'], headers={
         'Authorization': 'Bearer ' + credentials["access_token"],
         'Accept': 'application/json',
         })
 
         if response.status_code != 200:
             abort(401)
-        email = provider_data['userinfo']['email'](response.json())
+        email = client_config['web']['userinfo']['email'](response.json())
         userId = int(current_user.get_id())
         user = User.query.get(userId)
         print(user.email, email)
@@ -444,6 +350,7 @@ def verify_send_message(provider):
             if credentials["refresh_token"]:
                 user.send_email_authorized = True
                 user.oauth_refresh_token = token
+                
                 db.session.commit()
                 flash("Send mail verified", "success")
             else:
@@ -451,26 +358,6 @@ def verify_send_message(provider):
         else:
             flash("Please authenticate with the registered email ID", "danger")
     return redirect(url_for("main.home"))
-
-
-
-
-# def test():
-#     url = "https://oauth2.googleapis.com/token"
-#     user = User.query.get(int(current_user.get_id()))
-#     payload = {
-#         "client_id": "73844032923-2dkfq7ml3m0547ckoqpr1osrmb01201b.apps.googleusercontent.com",
-#         "client_secret": "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",
-#         "refresh_token": user.oauth_refresh_token,
-#         "grant_type": "refresh_token"
-#     }
-
-#     response = requests.post(url, data=payload)
-        
-#     print(response)
-#     print(response.json())
-#     return redirect(url_for("main.home"))
-
 
 
 @accounts_bp.route("/reset_password", methods=['GET', 'POST'])
@@ -484,6 +371,7 @@ def reset_request():
         flash('An email has been sent with instructions to reset your password.', 'info')
         return redirect(url_for('accounts.login'))
     return render_template('reset_request.html', title='Reset Password', form=form)
+
 
 
 @accounts_bp.route("/reset_password/<token>", methods=['GET', 'POST'])
@@ -518,7 +406,7 @@ def test2():
     # Add other requested scopes.
     ]
     flow = google_auth_oauthlib.flow.Flow.from_client_config(
-      load_client_secrets_file(CLIENT_SECRETS_FILE), scopes=SCOPES)
+      client_config=get_client_secrets("google"), scopes=SCOPES)
     
     flow.redirect_uri = url_for('accounts.callback2', _external=True)
 
@@ -540,7 +428,7 @@ def callback2():
     # Add other requested scopes.
     ]
     flow = google_auth_oauthlib.flow.Flow.from_client_config(
-        load_client_secrets_file(CLIENT_SECRETS_FILE), scopes=SCOPES, state=state)
+        client_config=get_client_secrets("google"), scopes=SCOPES, state=state)
     authorization_response = request.url
     flow.redirect_uri = "http://localhost:5000/callback2"
     flow.fetch_token(authorization_response=authorization_response)
@@ -548,13 +436,6 @@ def callback2():
     print(credentials.to_json())
     #get_credentials(request, state)
     return redirect(url_for("main.home"))
-
-
-# @accounts_bp.route("/t")
-# @login_required
-# def t():
-#     credentials = get_credentials_for_user(int(current_user.get_id()))
-#     return redirect(url_for("main.home"))
 
 
 @accounts_bp.route("/scopes")
@@ -565,55 +446,4 @@ def scopes():
     response = requests.get(url, params={"access_token": credentials.token})
     print(response.json())
     flash(response.json(), "success")
-    # message = gmail_send_message(credentials=credentials)
     return redirect(url_for("main.home"))
-
-
-
-def encrypt(key, content):
-    if content:
-        f = Fernet(key)
-        return f.encrypt(bytes(content, encoding="utf-8"))
-    return None
-
-
-def decrypt(key, token):
-    if token:
-        f = Fernet(key)
-        return str(f.decrypt(token), encoding="utf-8")
-    return None
-
-
-def load_client_secrets_file(filename):
-
-    """Load the client secrets file and return the client config."""
-    with open(filename, 'r') as f:
-        client_config = json.load(f)
-    return client_config
-
-
-
-
-def get_credentials_for_user(UserId):
-    user = User.query.get(UserId)
-    # flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-    #   CLIENT_SECRETS_FILE, scopes=SCOPES)
-    client_config = load_client_secrets_file(CLIENT_SECRETS_FILE)
-    flow = google_auth_oauthlib.flow.Flow.from_client_config(client_config, scopes=SCOPES)
-    refresh_token = decrypt(user.secret_salt, user.oauth_refresh_token)
-    # print(dir(flow))
-    # print(refresh_token)
-    credentials = Credentials(
-        token=None,
-        refresh_token=refresh_token,
-        token_uri=flow.client_config["token_uri"],
-        client_id=flow.client_config["client_id"],
-        client_secret=flow.client_config["client_secret"]
-    )
-    # print(credentials)
-    #print(credentials.to_json())
-    request = google.auth.transport.requests.Request()
-    credentials.refresh(request)
-
-    print(credentials.to_json())
-    return credentials

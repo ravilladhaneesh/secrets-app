@@ -27,3 +27,6 @@ COPY . /app
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
 #CMD ["python", "run.py"]
 CMD ["gunicorn", "-b", "0.0.0.0:5000", "run:app", "-w", "3"]
+
+#assurethem.com
+#keepsecurely.com

@@ -18,13 +18,18 @@ os.environ.setdefault('FORKED_BY_MULTIPROCESSING', '1')
 
 celery_app.conf.beat_schedule = {
     'add-every-morning': {
-        'task': 'tasks.add',
+        'task': 'tasks.schedule_email',
         'schedule': crontab(hour=6, minute=00),
+    },
+    'send-mail-3-mins': {
+        'task': 'tasks.schedule_email',
+        'schedule': crontab(minute='*/3')
     },
     # 'send-mail-30-seconds':{
     #     'task': 'tasks.schedule_email',
     #     'schedule': 30.0,
     # }
+    
 }
 
 @celery_app.task
@@ -44,7 +49,9 @@ def email_notification(userId):
 def schedule_email():
     with flask_app.app_context():
         users = User.query.all()
+        print(users, "==================>\n\n")
         for user in users:
-            if (date.today() - user.last_login).days > user.required_login_per_days:
-                if user.send_email_authorized:
+            print(user, "==================>\n\n")
+            if True or (date.today() - user.last_login).days > user.required_login_per_days:
+                if True or user.send_email_authorized:
                     email_notification.delay(user.id)

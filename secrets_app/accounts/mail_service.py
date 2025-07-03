@@ -56,7 +56,7 @@ def gmail_send_message(credentials):
 def send_otp_from_root_account(otp, email_to):
     rootUser = User.query.filter_by(email=current_app.config["ROOT_EMAIL"]).first()
     try:
-       from secrets_app.accounts.routes import get_credentials_for_user
+       from secrets_app.accounts.utils import get_credentials_for_user
     except ImportError as err:
        print("Import Error", err)
        raise ImportError
@@ -129,7 +129,7 @@ def send_reset_email(user):
     token = user.get_reset_token()
     rootUser = User.query.filter_by(email=current_app.config["ROOT_EMAIL"]).first()
     try:
-       from secrets_app.accounts.routes import get_credentials_for_user
+       from secrets_app.accounts.utils import get_credentials_for_user
     except ImportError as err:
        print("Import Error", err)
        raise ImportError
