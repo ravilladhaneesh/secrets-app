@@ -3,7 +3,8 @@ name: Deploy to AWS
 on:
   push:
     branches:
-      - main
+      - master
+      - impl-workflows
   workflow_dispatch:
 
 jobs:
