@@ -10,11 +10,9 @@ class Config:
     CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
     CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND")
     
-    
     ROOT_EMAIL = os.environ.get("ROOT_EMAIL")
 
     GOOGLE_LOGIN_REDIRECT_SCHEME = 'https'
-    print(os.getenv("GOOGLE_CLIENT_SECRETS"),"-->\n\n\n")
     OAUTH2_PROVIDERS = {
             # Google OAuth 2.0 documentation:
             # https://developers.google.com/identity/protocols/oauth2/web-server#httprest
