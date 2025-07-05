@@ -39,7 +39,7 @@ jobs:
       #     docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
       #     docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-      - name: Trigger Repo B workflow with commit SHA
+      - name: Trigger secrets-app-tf repo workflow with commit SHA
         run: |
           curl -X POST \
             -H "Accept: application/vnd.github+json" \
