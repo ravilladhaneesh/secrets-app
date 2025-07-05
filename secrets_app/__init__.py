@@ -6,6 +6,7 @@ from flask_migrate import Migrate
 from flask_mail import Mail
 from secrets_app.config import Config
 
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 db = SQLAlchemy()
 
@@ -38,6 +39,7 @@ def celery_init_app(app: Flask) -> Celery:
 
 def create_app(config_class=Config):
     app = Flask(__name__)
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
     app.config.from_object(config_class)
 
     db.init_app(app)
