@@ -8,14 +8,14 @@ function toggleSecretForm() {
         tableDiv.style.display = "none";  // Hide the table
     } else {
         formDiv.style.display = "none";  // Hide the form
-        tableDiv.style.display = "table";  // Show the table
+        tableDiv.style.display = "block";  // Show the table
     }
 }
 
 // Cancel the "Add Secret" form and show the table again
 function cancelSecretForm() {
     document.getElementById("add-secrets").style.display = "none";
-    document.getElementById("secrets-table").style.display = "table";  // Show the secrets table
+    document.getElementById("secrets-table").style.display = "block";  // Show the secrets table
 }
 
 // Add nominee input fields dynamically
@@ -44,21 +44,24 @@ function addNominees() {
 
     const nomineeDiv = document.createElement("div");
     nomineeDiv.setAttribute("id", `nominee-field-${index}`);
-    nomineeDiv.className = "border rounded p-3 mb-3 position-relative";
+    nomineeDiv.className = "relative border border-gray-200 rounded-lg p-4 mb-4 bg-gray-50";
 
     nomineeDiv.innerHTML = `
-        <div class="row">
-            <div class="col-md-6 mb-2">
-                <label class="form-label">Nominee Name:</label>
-                <input type="text" name="nominees-${index}-name" class="mt-1 block w-64 rounded-md border border-gray-300 px-2 py-1 text-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm text-gray-600 mb-1">Nominee Name:</label>
+                <input type="text" name="nominees-${index}-name" required"
+                        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
             </div>
-            <div class="col-md-6 mb-2">
-                <label class="form-label">Email:</label>
-                <input type="email" name="nominees-${index}-email_id" class="mt-1 block w-64 rounded-md border border-gray-300 px-2 py-1 text-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+            <div>
+                <label class="block text-sm text-gray-600 mb-1">Email:</label>
+                <input type="email" name="nominees-${index}-email_id" required"
+                        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
             </div>
         </div>
-        <button type="button" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2"
-            onclick="removeNominee('nominee-field-${index}')">
+        <button type="button"
+                class="absolute top-2 right-2 text-red-600 text-xs font-medium hover:underline"
+                onclick="removeNominee('nominee-field-${index}')">
             Remove
         </button>
     `;
