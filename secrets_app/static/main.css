@@ -1,12 +1,11 @@
 body {
   background: #000000;
-  color: #ffffff;
-  padding-top: 3rem;
+  /* color: #ffffff; */
+  /* padding-top: 3rem; */
 }
 
 .alert-row{
   margin-top: 0.4%;
-  background-color: white;
 }
 
 

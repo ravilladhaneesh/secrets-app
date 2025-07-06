@@ -19,23 +19,53 @@ function cancelSecretForm() {
 }
 
 // Add nominee input fields dynamically
+// function addNominees() {
+//     var container = document.getElementById("nominee-fields");
+//     // var index = container.children.length;
+//     var index = findFirstMissingValue(container);
+//     var newField = document.createElement("div");
+//     newField.setAttribute("id", "nominee-field-" + index);
+//     newField.innerHTML  = `
+//         <div>
+//             <label>Nominee Name:</label>
+//             <input type="text" name="nominees-${index}-name" required>
+//             <label>Email:</label>
+//             <input type="text" name="nominees-${index}-email_id" required>
+//             <button class='remove-nominee-btn' type="button" onclick="removeNominee('nominee-field-${index}')">Remove</button>
+//         </div>
+//     `;
+//     container.appendChild(newField);
+// }
+
+
 function addNominees() {
-    var container = document.getElementById("nominee-fields");
-    // var index = container.children.length;
-    var index = findFirstMissingValue(container);
-    var newField = document.createElement("div");
-    newField.setAttribute("id", "nominee-field-" + index);
-    newField.innerHTML  = `
-        <div>
-            <label>Nominee Name:</label>
-            <input type="text" name="nominees-${index}-name" required>
-            <label>Email:</label>
-            <input type="text" name="nominees-${index}-email_id" required>
-            <button class='remove-nominee-btn' type="button" onclick="removeNominee('nominee-field-${index}')">Remove</button>
+    const container = document.getElementById("nominee-fields");
+    const index = findFirstMissingValue(container);
+
+    const nomineeDiv = document.createElement("div");
+    nomineeDiv.setAttribute("id", `nominee-field-${index}`);
+    nomineeDiv.className = "border rounded p-3 mb-3 position-relative";
+
+    nomineeDiv.innerHTML = `
+        <div class="row">
+            <div class="col-md-6 mb-2">
+                <label class="form-label">Nominee Name:</label>
+                <input type="text" name="nominees-${index}-name" class="mt-1 block w-64 rounded-md border border-gray-300 px-2 py-1 text-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+            </div>
+            <div class="col-md-6 mb-2">
+                <label class="form-label">Email:</label>
+                <input type="email" name="nominees-${index}-email_id" class="mt-1 block w-64 rounded-md border border-gray-300 px-2 py-1 text-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+            </div>
         </div>
+        <button type="button" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2"
+            onclick="removeNominee('nominee-field-${index}')">
+            Remove
+        </button>
     `;
-    container.appendChild(newField);
+
+    container.appendChild(nomineeDiv);
 }
+
 
 // Remove nominee input field
 function removeNominee(id) {
@@ -86,17 +116,22 @@ function findFirstMissingValue(divObj){
     return len;
 }
 
-function showDeleteAlert(secret, deleteUrl){
-    document.getElementById('overlay').style.display = 'block';
+function showDeleteAlert(secret, deleteUrl) {
+    document.getElementById('overlay').style.display = 'flex';
 
     document.getElementById('del-secret-name').innerText = `Secret Name: ${secret.fieldName}`;
 
-    document.getElementById('overlay').style.display = 'block';
-    var del_secret_consent_div = document.getElementById('del-secret-consent');
-    del_secret_consent_div.style.display = 'block';
-    var del_secret_btn = del_secret_consent_div.getElementsByClassName("del-secret-btn")[0];
-    console.log(secret);
-    del_secret_btn.addEventListener("click", ()=>{
+    var delSecretConsent = document.getElementById('del-secret-consent');
+    delSecretConsent.style.display = 'block';
+
+    var delBtn = delSecretConsent.querySelector('.del-secret-btn');
+
+    // ✅ Remove old click handlers
+    var newDelBtn = delBtn.cloneNode(true);
+    delBtn.parentNode.replaceChild(newDelBtn, delBtn);
+
+    // ✅ Add a new one
+    newDelBtn.addEventListener('click', () => {
         window.location.href = deleteUrl;
     });
 }

@@ -1,44 +1,72 @@
 {% extends "layout.html" %}
 {% block content %}
-    <div class="home">
-        {% if current_user.is_verified == true %}
-            <div class="container">
-                <span>
-                    Please verify your account.OTP has already sent to your email {{ current_user.email }}
-                </span>
-                <a href="{{url_for('accounts.verify')}}">Click here to verify</a>
-                <button class='button' onclick="this.parentElement.style.display='none'">X</button>
-            </div>
-        {% endif %}
 
-        <div class="container desc">
-            <div class="main-desc">
-                <h1>Lorem ipsum dolor sit amet consectetur adipisicing elit.</h1>
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Commodi cupiditate laboriosam et a. Amet delectus blanditiis corrupti fuga est velit!</p>
-            </div>
+<!-- Verification Alert -->
+{% if current_user.is_verified == false %}
+<div class="max-w-3xl mx-auto mt-6 px-4">
+    <div class="flex items-center justify-between bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md shadow">
+        <div>
+            <p class="font-medium">Please verify your account.</p>
+            <p class="text-sm">
+                An OTP has been sent to your email <strong>{{ current_user.email }}</strong>.
+                <a href="{{ url_for('accounts.verify') }}" class="text-indigo-600 underline ml-1">Click here to verify</a>
+            </p>
         </div>
-        
-        <ul class="container features">
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4">
-                <li class="col feature-1">
-                    <div>
-                        feature-1
-                    </div>
-                    <p>Lorem ipsum dolor sit elit. Dolorum, in excepturi! voluptates.</p>
-                </li>
-                <li class="col feature-2">
-                    <div>feature-2</div>
-                    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Exercitationem, nam!</p>
-                </li>
-                <li class="col Data Protection">
-                    <div>Data Protection</div>
-                    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Exercitationem, nam!</p>
-                </li>
-                <li class="col feature-4">
-                    <div>feature-4</div>
-                    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Exercitationem, nam!</p>
-                </li>
-            </div>
-        </ul>
+        <button onclick="this.parentElement.parentElement.style.display='none'" class="text-2xl font-bold">×</button>
     </div>
+</div>
+{% endif %}
+
+<!-- Hero Section -->
+<section class="bg-gradient-to-br from-indigo-600 to-purple-700 text-white py-20">
+    <div class="max-w-5xl mx-auto text-center px-6">
+        <h1 class="text-5xl font-bold mb-6 leading-tight">Welcome to Secrets</h1>
+        <p class="text-lg md:text-xl text-indigo-100 mb-8">
+            Securely store your personal data, share encrypted secrets, and stay in control of your privacy.
+        </p>
+        <a href="{{ url_for('accounts.register') }}"
+           class="inline-block bg-white text-indigo-700 hover:bg-indigo-100 font-semibold px-6 py-3 rounded-full shadow-md transition">
+           Get Started
+        </a>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-16 bg-gray-100">
+    <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">What We Offer</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+
+            <!-- Feature 1 -->
+            <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition duration-300 text-center">
+                <div class="text-indigo-600 text-3xl mb-4">🔐</div>
+                <h3 class="font-semibold text-lg text-gray-800 mb-2">End-to-End Encryption</h3>
+                <p class="text-gray-600 text-sm">Your data is encrypted at every stage, ensuring full privacy and security.</p>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition duration-300 text-center">
+                <div class="text-indigo-600 text-3xl mb-4">💾</div>
+                <h3 class="font-semibold text-lg text-gray-800 mb-2">Secure Storage</h3>
+                <p class="text-gray-600 text-sm">Confidential secrets are stored safely with access control and verification.</p>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition duration-300 text-center">
+                <div class="text-indigo-600 text-3xl mb-4">🛡️</div>
+                <h3 class="font-semibold text-lg text-gray-800 mb-2">Data Protection</h3>
+                <p class="text-gray-600 text-sm">Compliant with modern standards to protect your sensitive information.</p>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition duration-300 text-center">
+                <div class="text-indigo-600 text-3xl mb-4">⚡</div>
+                <h3 class="font-semibold text-lg text-gray-800 mb-2">Fast & Reliable</h3>
+                <p class="text-gray-600 text-sm">Lightning fast access to your secrets — anytime, anywhere.</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
 {% endblock content %}

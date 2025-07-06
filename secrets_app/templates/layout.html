@@ -1,16 +1,21 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <!-- Custom styles -->
     <link rel="stylesheet" type='text/css' href="{{ url_for('static', filename='main.css')}}">
     <link rel="stylesheet" type='text/css' href="{{ url_for('static', filename='secrets.css')}}">
     <link rel="stylesheet" type='text/css' href="{{ url_for('static', filename='account.css')}}">
     <link rel="stylesheet" type='text/css' href="{{ url_for('static', filename='google-sign-in.css')}}">
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" type='text/css' href="{{ url_for('static', filename='updated-main.css')}}">
+    {% block headbootstrap%}
+    {% endblock headbootstrap%}
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"> -->
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <title>
         {% if title %}
@@ -20,60 +25,61 @@
         {% endif %}
     </title>
 </head>
-<body>
+<body class="bg-gray-100 min-h-screen">
 
-    <header class="site-header">
-        <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-          <div class="container-fluid">
-            <a class="navbar-brand mr-4" href="{{ url_for('main.home')}}">Secrets</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-              <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-              <div class="navbar-nav me-auto">
-                <a class="nav-item nav-link" href="{{ url_for('main.home')}}">Home</a>
+      {% set bg_classes = {
+        'success': 'bg-green-500',
+        'info': 'bg-blue-500',
+        'warning': 'bg-yellow-500',
+        'danger': 'bg-red-500',
+        'error': 'bg-red-500'
+    } %}
+
+
+    <!-- Navbar -->
+    <header class="bg-white shadow-md sticky top-0 z-10">
+        <nav class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="{{ url_for('main.home') }}" class="text-2xl font-bold text-indigo-700">Secrets</a>
+            <div class="space-x-4">
                 {% if current_user.is_authenticated %}
-                <a class="mr-auto nav-item nav-link" href="{{ url_for('secrets.secrets')}}">Secrets</a>
-                <!-- <a class="mr-auto nav-item nav-link" href="{{ url_for('secrets.nominees')}}">Nominees</a> -->
-                {% endif %}
-              </div>
-              <div class="navbar-nav">
-                {% if current_user.is_authenticated %}
-                <a class="nav-item nav-link" href="{{ url_for('accounts.account')}}">Account</a>
-                  <a class="nav-item nav-link" href="{{ url_for('accounts.logout')}}">Logout</a>
+                    <a href="{{ url_for('main.home') }}" class="text-gray-700 hover:text-indigo-600 font-medium">Home</a>
+                    <a href="{{ url_for('secrets.secrets') }}" class="text-gray-700 hover:text-indigo-600 font-medium">Secrets</a>
+                    <a href="{{ url_for('accounts.account') }}" class="text-gray-700 hover:text-indigo-600 font-medium">Account</a>
+                    <a href="{{ url_for('accounts.logout') }}" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md">Logout</a>
                 {% else %}
-                  <a class="nav-item nav-link" href="{{ url_for('accounts.login')}}">Login</a>
-                  <a class="nav-item nav-link" href="{{ url_for('accounts.register')}}">Register</a>
+                    <a href="{{ url_for('accounts.login') }}" class="text-gray-700 hover:text-indigo-600 font-medium">Login</a>
+                    <a href="{{ url_for('accounts.register') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md">Register</a>
                 {% endif %}
-              </div>
             </div>
-          </div>
         </nav>
     </header>
-    <main role="main" >
-        <div class="alert-row">
-            <div class="alert-messages">
-              {% with messages = get_flashed_messages(with_categories=true) %}
+
+    <!-- Flash Messages -->
+    <main role="main" class="px-4 py-6 max-w-4xl mx-auto">
+        <div class="mb-4">
+            {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
-                  {% for category, message in messages %}
-                      <div  class="row p-1 alert-{{ category }}">
-                        <div class="col-11">{{ message }}</div>
-                        <button class='button col-1' onclick="this.parentElement.style.display='none'">X</button>
+                    {% for category, message in messages %}
+                      <div class="flex justify-between items-center p-3 mb-2 rounded-md text-white {{ bg_classes.get(category, 'bg-gray-500') }}">
+                          <div>{{ message }}</div>
+                          <button onclick="this.parentElement.style.display='none'" class="font-bold ml-4">X</button>
                       </div>
                   {% endfor %}
                 {% endif %}
-              {% endwith %}
-            </div>
+            {% endwith %}
         </div>
+
+        <!-- Main Page Content -->
         <div class="content">
-            {% block content%}{% endblock content %}
+            {% block content %}{% endblock content %}
         </div>
     </main>
-    
-    
-    <!-- Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+    <!-- Scripts -->
     <script src="{{ url_for('static', filename='buildHTML.js')}}"></script>
     <script src="{{ url_for('static', filename='buildSecrets.js')}}"></script>
+    {% block bootstrap %}
+    {% endblock bootstrap%}
+
 </body>
 </html>
