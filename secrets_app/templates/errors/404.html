@@ -1,7 +1,16 @@
 {% extends "layout.html" %}
+
 {% block content %}
-    <div class="container">
-        <h1>Oops. Page Not Found (404)</h1>
-        <p>That page does not exist. Please try a different location</p>
+<div class="min-h-screen flex items-center justify-center bg-gray-100">
+    <div class="bg-white shadow-md rounded-lg p-8 max-w-xl text-center">
+        <h1 class="text-4xl font-bold text-blue-600 mb-4">404 Not Found</h1>
+        <p class="text-lg text-gray-700 mb-6">Oops. That page doesn't exist.</p>
+        <p class="text-gray-500">Please check the URL or try a different location.</p>
+        <div class="mt-6">
+            <a href="/" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">
+                Go Back Home
+            </a>
+        </div>
     </div>
+</div>
 {% endblock content %}

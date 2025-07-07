@@ -1,103 +1,87 @@
 {% extends "layout.html" %}
+
 {% block content %}
-<div class="container-sm account-container">
-    <!-- Account Info Section -->
-    <div class="account-info text-center">
-        <div class="username-header">
-            <h3 class="display-5">{{ current_user.firstName }}</h3>
-        </div>
-        <div class="email">
-            <div class="address">
-                <p class="lead text-muted">{{ current_user.email }}</p>
+<div class="max-w-4xl mx-auto px-4 py-10">
+
+    <!-- Profile Card -->
+    <div class="mb-8">
+        <div class="bg-white shadow-lg rounded-lg p-6 text-center">
+            <!-- Avatar (optional) -->
+            {# 
+            <div class="mb-4">
+                <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="avatar"
+                     class="rounded-full mx-auto shadow w-24 h-24 object-cover">
             </div>
-            <div class="is-verified">
-                {% if current_user.is_verified %}
-                    <img src="{{url_for('static', filename='images/verified.png')}}" alt="verified email img" />
-                {% else %}
-                    <a class="verify" href="{{url_for('accounts.verify', next=url_for('accounts.account'))}}">Verify</a>
-                {% endif %}
-            </div>
+            #}
+            <h3 class="text-xl font-semibold mb-1">{{ current_user.firstName }} {{ current_user.lastName }}</h3>
+            <p class="text-gray-500 mb-2">{{ current_user.email }}</p>
+            {% if current_user.is_verified %}
+                <span class="inline-block bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">Verified</span>
+            {% else %}
+                <a href="{{ url_for('accounts.verify', next=url_for('accounts.account')) }}"
+                   class="inline-block mt-2 text-sm bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-1.5 px-3 rounded">
+                    Verify Your Email
+                </a>
+            {% endif %}
         </div>
     </div>
 
-    <!-- Update Account Section -->
-    <div class="update-account">
-        <form action="#" method="POST" class="form">
-            {{ form.hidden_tag() }}
-            
-            <fieldset class="input-fieldset">
-                <legend>Update Your Information</legend>
-                <hr class="divider">
-                
-                <!-- First Name Field -->
-                <div class="input-fields">
-                    <div class="field-label">
-                        <label for="firstName" class="field-label">{{ form.firstName.label }}</label>
-                    </div>
-                    <div class="field-input">
-                        {% if form.firstName.errors %}
-                        <div class="error-feedback">
-                            {{ form.firstName(class="input-field field-invalid") }}
-                            <div class="feedback">
-                                {% for error in form.firstName.errors %}
-                                    <span class="text-danger">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        {% else %}
-                            {{ form.firstName(class="input-field") }}
-                        {% endif %}
-                    </div>
+    <!-- Update Info Section -->
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="bg-indigo-600 text-white px-6 py-4">
+            <h5 class="text-lg font-semibold">Update Your Account</h5>
+        </div>
+        <div class="p-6">
+            <form method="POST" action="#">
+                {{ form.hidden_tag() }}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     
-                </div>
-
-                <!-- Last Name Field -->
-                <div class="input-fields">
-                    <div class="field-label">
-                        <label for="lastName" class="field-label">{{ form.lastName.label }}</label>
+                    <!-- First Name -->
+                    <div>
+                        {{ form.firstName.label(class="block text-sm font-medium text-gray-700") }}
+                        {% if form.firstName.errors %}
+                            {{ form.firstName(class="mt-1 block w-full rounded-md border border-red-500 px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:ring-red-500 focus:border-red-500") }}
+                            <p class="text-red-600 text-sm mt-1">
+                                {% for error in form.firstName.errors %}{{ error }}{% endfor %}
+                            </p>
+                        {% else %}
+                            {{ form.firstName(class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500") }}
+                        {% endif %}
                     </div>
-                    <div class="field-input">
+
+                    <!-- Last Name -->
+                    <div>
+                        {{ form.lastName.label(class="block text-sm font-medium text-gray-700") }}
                         {% if form.lastName.errors %}
-                        <div class="error-feedback">
-                            {{ form.lastName(class="input-field field-invalid") }}
-                            <div class="feedback">
-                                {% for error in form.lastName.errors %}
-                                    <span class="text-danger">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        </div>
+                            {{ form.lastName(class="mt-1 block w-full rounded-md border border-red-500 px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:ring-red-500 focus:border-red-500") }}
+                            <p class="text-red-600 text-sm mt-1">
+                                {% for error in form.lastName.errors %}{{ error }}{% endfor %}
+                            </p>
                         {% else %}
-                            {{ form.lastName(class="input-field") }}
+                            {{ form.lastName(class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500") }}
                         {% endif %}
                     </div>
-                </div>
 
-                <!-- Required Login Per Days Field -->
-                <div class="input-fields">
-                    <div class="field-label">
-                        <label for="required_login_per_days" class="field-label">{{ form.required_login_per_days.label }}</label>
-                    </div>
-                    <div class="field-input">
+                    <!-- Required Login Per Days -->
+                    <div class="md:col-span-2">
+                        {{ form.required_login_per_days.label(class="block text-sm font-medium text-gray-700") }}
                         {% if form.required_login_per_days.errors %}
-                        <div class="error-feedback">
-                            {{ form.required_login_per_days(class="input-field field-invalid") }}
-                            <div class="feedback">
-                                {% for error in form.required_login_per_days.errors %}
-                                    <span class="text-danger">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        </div>
+                            {{ form.required_login_per_days(class="mt-1 block w-full rounded-md border border-red-500 px-3 py-2 text-sm text-gray-700 focus:ring-red-500 focus:border-red-500") }}
+                            <p class="text-red-600 text-sm mt-1">
+                                {% for error in form.required_login_per_days.errors %}{{ error }}{% endfor %}
+                            </p>
                         {% else %}
-                            {{ form.required_login_per_days(class="input-field") }}
+                            {{ form.required_login_per_days(class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:ring-indigo-500 focus:border-indigo-500") }}
                         {% endif %}
                     </div>
                 </div>
-            </fieldset>
 
-            <div class="submit-field text-center">
-                {{ form.submit(class='btn btn-primary btn-lg') }}
-            </div>
-        </form>
+                <!-- Submit Button -->
+                <div class="mt-6 text-center">
+                    {{ form.submit(class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded shadow-sm text-sm") }}
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock content %}
