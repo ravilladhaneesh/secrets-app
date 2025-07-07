@@ -109,8 +109,8 @@ def secrets():
             return redirect(url_for('secrets.secrets'))
         else:
             # If form is not valid, display the errors
-            flash("Form contains errors, please correct them.", "danger")
-
+            flash("Form contains errors, please correct them.(Check if you have added duplicate email ids)", "danger")
+            return redirect(url_for('secrets.secrets'))
     # Fetch user's secrets
     secrets = Secret.query.filter_by(user_id=int(userId)).all()
     secrets_dict = [secret.to_dict() for secret in secrets]
@@ -121,8 +121,12 @@ def secrets():
 @secrets_bp.route("/deleteSecret/<int:secretId>", methods=["GET", "POST"])
 @login_required
 def delete_secret(secretId):
+    if not current_user.is_authenticated:
+        return redirect(url_for('accounts.login'))
+
     userId = current_user.get_id()
     user = User.query.get(int(userId))
+
     secret = Secret.query.get_or_404(secretId)
     if secret.user_id == user.id:
         db.session.delete(secret)
@@ -136,8 +140,15 @@ def delete_secret(secretId):
 @secrets_bp.route("/editSecret/<int:secretId>", methods=["GET", "POST"])
 @login_required
 def edit_secret(secretId):
+    if not current_user.is_authenticated:
+        return redirect(url_for('accounts.login'))
+    
+    userId = current_user.get_id()
+    user = User.query.get(int(userId))
     secret = Secret.query.get_or_404(secretId)
-
+    if secret.user_id != user.id:
+        flash("You do not have permission to edit this secret", "danger")
+        return redirect(url_for('secrets.secrets'))
     form = AddSecretsForm()
     if form.validate_on_submit():
         print("hello")
