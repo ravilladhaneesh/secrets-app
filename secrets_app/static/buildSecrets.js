@@ -82,7 +82,7 @@ function removeNominee(id) {
 
 // Show secret details in a popup
 function showSecretDetails(secret) {
-    document.getElementById('overlay').style.display = 'block';
+    document.getElementById('overlay').style.display = 'flex';
     
     document.getElementById('secret-name').innerText = `Secret Name: ${secret.fieldName}`;
     document.getElementById('secret-value').innerText = `Value: ${secret.fieldSecret}`;
@@ -93,7 +93,6 @@ function showSecretDetails(secret) {
         li.innerText = `${nominee.name} - ${nominee.email_id}`;
         nomineeList.appendChild(li);
     });
-    document.getElementById('overlay').style.display = 'block';
     document.getElementById('details-popup').style.display = 'block';
 
 }
