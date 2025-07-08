@@ -75,3 +75,37 @@ class Nominee(db.Model):
 
     def __repr__(self):
         return f"Email('{self.name}', '{self.email_id})"
+
+
+class Note(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    to_self = db.Column(db.Boolean, default=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    receivers = db.relationship('Receiver', backref=backref('notes', passive_deletes=True), lazy=True, cascade='all, delete')
+    sent = db.Column(db.Boolean, default=False, nullable=False)
+    send_date = db.Column(db.DateTime, nullable=True)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'content': self.content,
+            'to_self': self.to_self,
+            'user_id': self.user_id,
+            'receivers': [{'name': receiver.name, 'email_id': receiver.email_id} for receiver in self.receivers]
+        }
+
+    def __repr__(self):
+        return f'Note("{self.title}", "{self.user_id}")'
+
+class Receiver(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email_id = db.Column(db.String(100), nullable=False)
+    note_id = db.Column(db.Integer, db.ForeignKey('note.id', ondelete='CASCADE'), nullable=False)
+
+    def __repr__(self):
+        return f'Receiver("{self.name}", "{self.email_id}")'
+    

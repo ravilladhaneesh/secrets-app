@@ -109,9 +109,14 @@ def secrets():
             return redirect(url_for('secrets.secrets'))
         else:
             # If form is not valid, display the errors
-            flash("Form contains errors, please correct them.(Check if you have added duplicate email ids)", "danger")
+            # print("Form errors:", form.errors)
+            for field, errors in form.errors.items():
+                for error in errors:
+                    flash(f'Error in {field}: {error}', "danger")
+            # flash("Form contains errors, please correct them.(Check if you have added duplicate email ids)", "danger")
             return redirect(url_for('secrets.secrets'))
     # Fetch user's secrets
+    print("Fetching secrets for user:", userId)
     secrets = Secret.query.filter_by(user_id=int(userId)).all()
     secrets_dict = [secret.to_dict() for secret in secrets]
     

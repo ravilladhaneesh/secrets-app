@@ -1,0 +1,133 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-10">
+    <div class="bg-white shadow-sm rounded-lg p-6">
+        <h2 class="text-2xl font-bold text-center mb-6">Edit Note</h2>
+
+        <form method="POST" >
+            {{ form.hidden_tag() }}
+
+            {% if form.errors %}
+                <div class="bg-red-100 text-red-700 border border-red-300 rounded p-4 mb-6">
+                    <ul class="list-disc list-inside space-y-1">
+                        {% for field, errors in form.errors.items() %}
+                            {% for error in errors %}
+                                <li><strong>{{ form[field].label.text }}:</strong> {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <!-- Note Name -->
+            <div class="mb-5">
+                {{ form.title.label(class="block text-sm font-medium text-gray-700 mb-1") }}
+                {{ form.title(class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500") }}
+            </div>
+
+            <!-- Note Title -->
+            <div class="mb-5">
+                {{ form.content.label(class="block text-sm font-medium text-gray-700 mb-1") }}
+                {{ form.content(class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500") }}
+            </div>
+
+            <!-- To Self Checkbox -->
+            <div class="mb-5">
+                <label class="inline-flex items-center">
+                    {{ form.to_self(class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500") }}
+                    <span class="ml-2 text-sm text-gray-600">Self</span>
+                </label>
+            </div>
+
+            <!-- Receivers Section -->
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Receivers:</label>
+                <div id="receiver-fields">
+                    {% for receiver in note.receivers %}
+                    <div id="receiver-field-{{ loop.index0 }}" class="relative border border-gray-200 rounded-lg p-4 mb-4 bg-gray-50">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Receiver Name:</label>
+                                <input type="text" name="receivers-{{ loop.index0 }}-name" required value="{{ receiver.name }}"
+                                       class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Email:</label>
+                                <input type="email" name="receivers-{{ loop.index0 }}-email_id" required value="{{ receiver.email_id }}"
+                                       class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                        </div>
+                        <button type="button"
+                                class="absolute top-2 right-2 text-red-600 text-xs font-medium hover:underline"
+                                onclick="removeReceiver('receiver-field-{{ loop.index0 }}')">
+                            Remove
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="button"
+                        class="mt-2 inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                        onclick="addReceiverFields()">
+                    + Add Receiver
+                </button>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-between items-center mt-8">
+                <a href="{{ url_for('notes.notes') }}"
+                   class="inline-block bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded">
+                    Back
+                </a>
+                <div class="flex gap-2">
+                    <button type="button"
+                            class="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 font-medium py-2 px-4 rounded"
+                            onclick="window.location.reload()">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded">
+                        Update Note
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Function to dynamically add receiver fields
+    function addReceiverFields() {
+        const receiverFieldsContainer = document.getElementById('receiver-fields');
+        const newFieldIndex = receiverFieldsContainer.children.length;
+
+        const newFieldHTML = `
+            <div id="receiver-field-${newFieldIndex}" class="relative border border-gray-200 rounded-lg p-4 mb-4 bg-gray-50">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Receiver Name:</label>
+                        <input type="text" name="receivers-${newFieldIndex}-name" required
+                               class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Email:</label>
+                        <input type="email" name="receivers-${newFieldIndex}-email_id" required
+                               class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </div>
+                <button type="button" class="absolute top-2 right-2 text-red-600 text-xs font-medium hover:underline"
+                        onclick="removeReceiver('receiver-field-${newFieldIndex}')">Remove</button>
+            </div>
+        `;
+
+        receiverFieldsContainer.insertAdjacentHTML('beforeend', newFieldHTML);
+    }
+
+    // Function to remove receiver fields
+    function removeReceiver(fieldId) {
+        const fieldToRemove = document.getElementById(fieldId);
+        fieldToRemove.remove();
+    }
+</script>
+
+{% endblock %}
