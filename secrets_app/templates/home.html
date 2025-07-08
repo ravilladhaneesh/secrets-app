@@ -24,10 +24,17 @@
         <p class="text-lg md:text-xl text-indigo-100 mb-8">
             Securely store your personal data, share encrypted secrets, and stay in control of your privacy.
         </p>
+        {% if current_user.is_authenticated %}
         <a href="{{ url_for('secrets.secrets') }}"
+           class="inline-block bg-white text-indigo-700 hover:bg-indigo-100 font-semibold px-6 py-3 rounded-full shadow-md transition">
+           Store Your Secrets
+        </a>
+        {% else %}
+        <a href="{{ url_for('accounts.login') }}"
            class="inline-block bg-white text-indigo-700 hover:bg-indigo-100 font-semibold px-6 py-3 rounded-full shadow-md transition">
            Get Started
         </a>
+        {% endif %}
     </div>
 </section>
 
