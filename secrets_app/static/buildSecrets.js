@@ -41,6 +41,7 @@ function cancelSecretForm() {
 function addNominees() {
     const container = document.getElementById("nominee-fields");
     const index = findFirstMissingValue(container);
+    console.log("Adding nominee at index:", index);
 
     const nomineeDiv = document.createElement("div");
     nomineeDiv.setAttribute("id", `nominee-field-${index}`);

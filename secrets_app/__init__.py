@@ -50,11 +50,13 @@ def create_app(config_class=Config):
 
     from secrets_app.accounts.routes import accounts_bp
     from secrets_app.secrets.routes import secrets_bp
+    from secrets_app.notes.routes import notes_bp
     from secrets_app.main.routes import main_bp
     from secrets_app.errors.handlers import errors
 
     app.register_blueprint(accounts_bp)
     app.register_blueprint(secrets_bp)
+    app.register_blueprint(notes_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(errors)
 

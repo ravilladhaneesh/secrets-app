@@ -8,6 +8,7 @@
     <!-- Custom styles -->
     <link rel="stylesheet" type='text/css' href="{{ url_for('static', filename='main.css')}}">
     <link rel="stylesheet" type='text/css' href="{{ url_for('static', filename='secrets.css')}}">
+    <link rel="stylesheet" type='text/css' href="{{ url_for('static', filename='notes.css')}}">
     <link rel="stylesheet" type='text/css' href="{{ url_for('static', filename='account.css')}}">
     <link rel="stylesheet" type='text/css' href="{{ url_for('static', filename='google-sign-in.css')}}">
     <link rel="stylesheet" type='text/css' href="{{ url_for('static', filename='updated-main.css')}}">
@@ -42,7 +43,7 @@
             <a href="{{ url_for('main.home') }}" class="text-2xl font-bold text-indigo-700">Secrets</a>
             <div class="space-x-4">
                 {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('main.home') }}" class="text-gray-700 hover:text-indigo-600 font-medium">Home</a>
+                    <a href="{{ url_for('notes.notes') }}" class="text-gray-700 hover:text-indigo-600 font-medium">Notes</a>
                     <a href="{{ url_for('secrets.secrets') }}" class="text-gray-700 hover:text-indigo-600 font-medium">Secrets</a>
                     <a href="{{ url_for('accounts.account') }}" class="text-gray-700 hover:text-indigo-600 font-medium">Account</a>
                     <a href="{{ url_for('accounts.logout') }}" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md">Logout</a>
@@ -78,6 +79,7 @@
     <!-- Scripts -->
     <script src="{{ url_for('static', filename='buildHTML.js')}}"></script>
     <script src="{{ url_for('static', filename='buildSecrets.js')}}"></script>
+    <script src="{{ url_for('static', filename='buildNotes.js')}}"></script>
     {% block bootstrap %}
     {% endblock bootstrap%}
 
