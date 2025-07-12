@@ -3,6 +3,7 @@ from secrets_app.secrets.forms import AddSecretsForm, AddNomineeForm
 from secrets_app import db
 from secrets_app.model import User, Secret, Nominee
 from flask_login import current_user, login_required
+from secrets_app.secrets.utils import encrypt_secret, decrypt_secret
 
 
 secrets_bp = Blueprint("secrets", __name__)
@@ -15,10 +16,10 @@ dummy_secrets_data = [
 ]
 
 
-@secrets_bp.route("/nominees")
-@login_required
-def nominees():
-    return render_template("nominee.html", title='nominee')
+# @secrets_bp.route("/nominees")
+# @login_required
+# def nominees():
+#     return render_template("nominee.html", title='nominee')
 
 
 
@@ -94,8 +95,8 @@ def secrets():
             for nominee in form.nominees:
                 print(nominee)
             print("hello")
-            secret_name = form.name.data
-            secret_value = form.secret.data
+            secret_name = encrypt_secret(form.name.data, user.secret_salt)
+            secret_value = encrypt_secret(form.secret.data, user.secret_salt)
             nominees = []
 
             for nominee in form.nominees.data:
@@ -119,8 +120,10 @@ def secrets():
     print("Fetching secrets for user:", userId)
     secrets = Secret.query.filter_by(user_id=int(userId)).all()
     secrets_dict = [secret.to_dict() for secret in secrets]
-    
-    return render_template('secrets.html', secrets=secrets_dict, form=form, title="Secrets List")
+    decrypt_secret_list = []
+    for secret in secrets_dict:
+        decrypt_secret_list.append({key: decrypt_secret(secret[key], user.secret_salt) if key in ['fieldName', 'fieldSecret'] else value for key, value in secret.items()})    
+    return render_template('secrets.html', secrets=decrypt_secret_list, form=form, title="Secrets List")
 
 
 @secrets_bp.route("/deleteSecret/<int:secretId>", methods=["GET", "POST"])
@@ -157,8 +160,8 @@ def edit_secret(secretId):
     form = AddSecretsForm()
     if form.validate_on_submit():
         print("hello")
-        secret.fieldName = form.name.data
-        secret.fieldSecret = form.secret.data
+        secret.fieldName = encrypt_secret(form.name.data, user.secret_salt)
+        secret.fieldSecret = encrypt_secret(form.secret.data, user.secret_salt)
         for i in secret.nominees:
             db.session.delete(i)
 
@@ -176,7 +179,7 @@ def edit_secret(secretId):
         flash("Secret updated successfully", "success")
         return redirect(url_for("secrets.secrets"))
     if request.method == "GET":
-        form.name.data = secret.fieldName
+        form.name.data = decrypt_secret(secret.fieldName, user.secret_salt)
         # for nominee in secret.nominees:
         #     # nominee_form = AddNomineeForm()
         #     # nominee_form.name = nominee.name

@@ -1,75 +1,123 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<!-- Verification Alert -->
-{% if current_user.is_verified == false %}
-<div class="max-w-3xl mx-auto mt-6 px-4">
-    <div class="flex items-center justify-between bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md shadow">
-        <div>
-            <p class="font-medium">Please verify your account.</p>
-            <p class="text-sm">
-                An OTP has been sent to your email <strong>{{ current_user.email }}</strong>.
-                <a href="{{ url_for('accounts.verify') }}" class="text-indigo-600 underline ml-1">Click here to verify</a>
-            </p>
-        </div>
-        <button onclick="this.parentElement.parentElement.style.display='none'" class="text-2xl font-bold">×</button>
-    </div>
-</div>
+<!-- Verification Alert (one-time per session) -->
+{% if current_user.is_authenticated and not current_user.is_verified and verification_alert_shown %}
+  <div class="max-w-3xl mx-auto mt-6 px-4">
+      <div class="flex items-center justify-between bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md shadow">
+          <div>
+              <p class="font-medium">Please verify your account.</p>
+              <p class="text-sm">
+                  An OTP has been sent to <strong>{{ current_user.email }}</strong>.
+                  <a href="{{ url_for('accounts.verify') }}" class="text-indigo-600 underline ml-1">Verify now</a>
+              </p>
+          </div>
+          <button onclick="this.parentElement.parentElement.style.display='none'" class="text-2xl font-bold">×</button>
+      </div>
+  </div>
 {% endif %}
+
 
 <!-- Hero Section -->
 <section class="bg-gradient-to-br from-indigo-600 to-purple-700 text-white py-20">
     <div class="max-w-5xl mx-auto text-center px-6">
-        <h1 class="text-5xl font-bold mb-6 leading-tight">Welcome to Secrets</h1>
-        <p class="text-lg md:text-xl text-indigo-100 mb-8">
-            Securely store your personal data, share encrypted secrets, and stay in control of your privacy.
+        <h1 class="text-5xl font-bold mb-6 leading-tight">Welcome to SecureThem</h1>
+        <p class="text-lg md:text-xl text-indigo-100 mb-4">
+            Store personal notes, protect private secrets, and share them when it matters.
+        </p>
+        <p class="text-sm md:text-base text-indigo-200 mb-8">
+            Designed for privacy, built for control.
         </p>
         {% if current_user.is_authenticated %}
         <a href="{{ url_for('secrets.secrets') }}"
            class="inline-block bg-white text-indigo-700 hover:bg-indigo-100 font-semibold px-6 py-3 rounded-full shadow-md transition">
-           Store Your Secrets
+           Go to Dashboard
         </a>
         {% else %}
         <a href="{{ url_for('accounts.login') }}"
            class="inline-block bg-white text-indigo-700 hover:bg-indigo-100 font-semibold px-6 py-3 rounded-full shadow-md transition">
-           Get Started
+           Get Started – It’s Free
         </a>
         {% endif %}
     </div>
 </section>
 
+<!-- How It Works -->
+<section class="bg-white py-16">
+  <div class="max-w-6xl mx-auto px-6 text-center">
+    <h2 class="text-3xl font-bold text-gray-800 mb-10">How It Works</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-10 text-left">
+
+      <div class="p-6 bg-gray-50 rounded-lg shadow hover:shadow-md transition">
+        <div class="mb-4">
+          <div class="w-12 h-12 flex items-center justify-center bg-indigo-600 text-white rounded-full text-xl font-bold">1</div>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-800 mb-2">Add Notes & Secrets</h3>
+        <p class="text-gray-600">
+          Save private notes for personal use or prepare encrypted secrets for future delivery.
+        </p>
+      </div>
+
+      <div class="p-6 bg-gray-50 rounded-lg shadow hover:shadow-md transition">
+        <div class="mb-4">
+          <div class="w-12 h-12 flex items-center justify-center bg-indigo-600 text-white rounded-full text-xl font-bold">2</div>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-800 mb-2">Assign Recipients</h3>
+        <p class="text-gray-600">
+          You decide who gets what—link notes to yourself or assign secrets and notes to trusted contacts.
+        </p>
+      </div>
+
+      <div class="p-6 bg-gray-50 rounded-lg shadow hover:shadow-md transition">
+        <div class="mb-4">
+          <div class="w-12 h-12 flex items-center justify-center bg-indigo-600 text-white rounded-full text-xl font-bold">3</div>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-800 mb-2">Trigger-Based Email Delivery</h3>
+        <p class="text-gray-600">
+          Based on your login activity, authorized Gmail delivery sends your saved data as configured.
+        </p>
+      </div>
+    </div>
+
+    {% if not current_user.is_authenticated %}
+    <div class="mt-12">
+      <a href="{{ url_for('accounts.register') }}"
+         class="inline-block bg-indigo-600 text-white font-semibold px-6 py-3 rounded-full shadow hover:bg-indigo-700 transition">
+         Create Your Free Account
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
 <!-- Features Section -->
 <section class="py-16 bg-gray-100">
     <div class="max-w-6xl mx-auto px-6">
-        <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">What We Offer</h2>
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">Why Choose SecureThem?</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
 
-            <!-- Feature 1 -->
-            <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition duration-300 text-center">
+            <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition text-center">
                 <div class="text-indigo-600 text-3xl mb-4">🔐</div>
                 <h3 class="font-semibold text-lg text-gray-800 mb-2">End-to-End Encryption</h3>
-                <p class="text-gray-600 text-sm">Your data is encrypted at every stage, ensuring full privacy and security.</p>
+                <p class="text-gray-600 text-sm">Your data is encrypted from creation to delivery for complete security.</p>
             </div>
 
-            <!-- Feature 2 -->
-            <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition duration-300 text-center">
-                <div class="text-indigo-600 text-3xl mb-4">💾</div>
-                <h3 class="font-semibold text-lg text-gray-800 mb-2">Secure Storage</h3>
-                <p class="text-gray-600 text-sm">Confidential secrets are stored safely with access control and verification.</p>
+            <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition text-center">
+                <div class="text-indigo-600 text-3xl mb-4">📝</div>
+                <h3 class="font-semibold text-lg text-gray-800 mb-2">Smart Note Management</h3>
+                <p class="text-gray-600 text-sm">Use notes for reminders, instructions, or share with specific recipients.</p>
             </div>
 
-            <!-- Feature 3 -->
-            <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition duration-300 text-center">
-                <div class="text-indigo-600 text-3xl mb-4">🛡️</div>
-                <h3 class="font-semibold text-lg text-gray-800 mb-2">Data Protection</h3>
-                <p class="text-gray-600 text-sm">Compliant with modern standards to protect your sensitive information.</p>
+            <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition text-center">
+                <div class="text-indigo-600 text-3xl mb-4">📬</div>
+                <h3 class="font-semibold text-lg text-gray-800 mb-2">Authorized Gmail Delivery</h3>
+                <p class="text-gray-600 text-sm">Grant email access once—SecureThem handles the rest automatically.</p>
             </div>
 
-            <!-- Feature 4 -->
-            <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition duration-300 text-center">
-                <div class="text-indigo-600 text-3xl mb-4">⚡</div>
-                <h3 class="font-semibold text-lg text-gray-800 mb-2">Fast & Reliable</h3>
-                <p class="text-gray-600 text-sm">Lightning fast access to your secrets — anytime, anywhere.</p>
+            <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition text-center">
+                <div class="text-indigo-600 text-3xl mb-4">⚙️</div>
+                <h3 class="font-semibold text-lg text-gray-800 mb-2">Customizable Triggers</h3>
+                <p class="text-gray-600 text-sm">Set when and how your data should be shared—fully configurable.</p>
             </div>
 
         </div>
