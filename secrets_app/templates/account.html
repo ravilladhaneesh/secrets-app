@@ -1,5 +1,4 @@
 {% extends "layout.html" %}
-
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 py-10">
 
@@ -13,34 +12,34 @@
 
             <!-- Badges Row -->
             <div class="flex flex-wrap justify-center gap-2 mt-2">
-                {# Verified Badge or Verify Prompt #}
+                <!-- Email Verified -->
                 {% if current_user.is_verified %}
                     <span class="inline-flex items-center bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">
                         ✅ Verified
                     </span>
                 {% else %}
                     <a href="{{ url_for('accounts.verify', next=url_for('accounts.account')) }}"
-                    class="inline-flex items-center bg-yellow-400 hover:bg-yellow-500 text-white font-semibold px-3 py-1 rounded-full">
+                       class="inline-flex items-center bg-yellow-400 hover:bg-yellow-500 text-white font-semibold px-3 py-1 rounded-full">
                         ⚠️ Verify Email
                     </a>
                 {% endif %}
 
-                {# Email Authorized Badge or Warning Link #}
+                <!-- Email Authorized -->
                 {% if current_user.send_email_authorized %}
                     <span class="inline-flex items-center bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
                         📧 Email Authorized
                     </span>
                 {% else %}
                     <a href="{{ url_for('accounts.authorize_send_message', provider='google') }}"
-                    class="inline-flex items-center bg-red-100 text-red-800 text-sm font-medium px-3 py-1 rounded-full hover:bg-red-200">
+                       class="inline-flex items-center bg-red-100 text-red-800 text-sm font-medium px-3 py-1 rounded-full hover:bg-red-200">
                         ⚠️ Grant Email Access
                     </a>
                 {% endif %}
 
-                {# Login Requirement Badge #}
+                <!-- Login Frequency -->
                 {% if current_user.required_login_per_days %}
                     <span class="inline-flex items-center bg-purple-100 text-purple-800 text-sm font-medium px-3 py-1 rounded-full">
-                        🔒 Login Required Every {{ current_user.required_login_per_days }} Days
+                        🔒 Login Every {{ current_user.required_login_per_days }} Days
                     </span>
                 {% else %}
                     <span class="inline-flex items-center bg-gray-100 text-gray-800 text-sm font-medium px-3 py-1 rounded-full">
@@ -48,12 +47,10 @@
                     </span>
                 {% endif %}
             </div>
-
         </div>
     </div>
 
-
-    <!-- Update Info Section -->
+    <!-- Update Account Form -->
     <div class="bg-white shadow-md rounded-lg overflow-hidden">
         <div class="bg-indigo-600 text-white px-6 py-4">
             <h5 class="text-lg font-semibold">Update Your Account</h5>
@@ -62,54 +59,58 @@
             <form method="POST" action="#">
                 {{ form.hidden_tag() }}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    
                     <!-- First Name -->
                     <div>
                         {{ form.firstName.label(class="block text-sm font-medium text-gray-700") }}
-                        {% if form.firstName.errors %}
-                            {{ form.firstName(class="mt-1 block w-full rounded-md border border-red-500 px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:ring-red-500 focus:border-red-500") }}
-                            <p class="text-red-600 text-sm mt-1">
-                                {% for error in form.firstName.errors %}{{ error }}{% endfor %}
-                            </p>
-                        {% else %}
-                            {{ form.firstName(class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500") }}
-                        {% endif %}
+                        {{ form.firstName(class="mt-1 block w-full rounded-md border px-3 py-2 text-sm text-gray-700 " + ("border-red-500 focus:ring-red-500 focus:border-red-500" if form.firstName.errors else "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500")) }}
+                        {% for error in form.firstName.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ error }}</p>
+                        {% endfor %}
                     </div>
 
                     <!-- Last Name -->
                     <div>
                         {{ form.lastName.label(class="block text-sm font-medium text-gray-700") }}
-                        {% if form.lastName.errors %}
-                            {{ form.lastName(class="mt-1 block w-full rounded-md border border-red-500 px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:ring-red-500 focus:border-red-500") }}
-                            <p class="text-red-600 text-sm mt-1">
-                                {% for error in form.lastName.errors %}{{ error }}{% endfor %}
-                            </p>
-                        {% else %}
-                            {{ form.lastName(class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500") }}
-                        {% endif %}
+                        {{ form.lastName(class="mt-1 block w-full rounded-md border px-3 py-2 text-sm text-gray-700 " + ("border-red-500 focus:ring-red-500 focus:border-red-500" if form.lastName.errors else "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500")) }}
+                        {% for error in form.lastName.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ error }}</p>
+                        {% endfor %}
                     </div>
 
-                    <!-- Required Login Per Days -->
+                    <!-- Login Frequency -->
                     <div class="md:col-span-2">
                         {{ form.required_login_per_days.label(class="block text-sm font-medium text-gray-700") }}
-                        {% if form.required_login_per_days.errors %}
-                            {{ form.required_login_per_days(class="mt-1 block w-64 rounded-md border border-red-500 px-3 py-2 text-sm text-gray-700 focus:ring-red-500 focus:border-red-500") }}
-                            <p class="text-red-600 text-sm mt-1">
-                                {% for error in form.required_login_per_days.errors %}{{ error }}{% endfor %}
-                            </p>
-                        {% else %}
-                            {{ form.required_login_per_days(class="mt-1 block w-64 rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:ring-indigo-500 focus:border-indigo-500") }}
-                        {% endif %}
+                        {{ form.required_login_per_days(class="mt-1 block w-48 rounded-md border px-3 py-2 text-sm text-gray-700 " + ("border-red-500 focus:ring-red-500 focus:border-red-500" if form.required_login_per_days.errors else "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500")) }}
+                        {% for error in form.required_login_per_days.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ error }}</p>
+                        {% endfor %}
                     </div>
-
                 </div>
 
-                <!-- Submit Button -->
+                <!-- Save Button -->
                 <div class="mt-6 text-center">
                     {{ form.submit(class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded shadow-sm text-sm") }}
                 </div>
             </form>
         </div>
     </div>
+
+    <!-- Delete Account Section -->
+    <div class="mt-10 text-center">
+        <form method="POST" action="{{ url_for('accounts.delete_account') }}" onsubmit="return confirm('⚠️ Are you sure you want to permanently delete your account? This action cannot be undone.')">
+            <button type="submit"
+                class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded shadow-sm text-sm">
+                Delete Account
+            </button>
+        </form>
+        <p class="text-sm text-gray-500 mt-4 max-w-md mx-auto">
+            Deleting your account will also stop any scheduled email deliveries. We recommend you
+            <a href="https://myaccount.google.com/permissions" class="text-indigo-600 underline" target="_blank">
+                remove access from your Google Account’s third-party app permissions
+            </a>
+            after deleting (or revoke gmail access without deleting your account).
+        </p>
+    </div>
+
 </div>
-{% endblock content %}
+{% endblock %}

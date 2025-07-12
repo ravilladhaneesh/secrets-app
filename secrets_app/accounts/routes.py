@@ -138,7 +138,9 @@ def login():
                 login_user(user, remember=False)
                 next = request.args.get("next")
                 flash(f'Logged In as {user.firstName}', 'success')
-                return redirect(next) if next else redirect(url_for('main.home'))
+                if not user.is_oauth and not user.is_verified:
+                    verification_alert_shown = False
+                return redirect(next) if next else redirect(url_for('main.home', verification_alert_shown=verification_alert_shown))
             elif user and user.is_oauth:
                 message = "Please choose a valid login method"
         flash(message, 'danger')
@@ -291,7 +293,7 @@ def authorize_send_message(provider):
 
     client_config = get_client_secrets(provider)
     flow = google_auth_oauthlib.flow.Flow.from_client_config(
-      client_config=client_config, scopes=SCOPES["sendmessage"])
+      client_config=client_config, scopes=[SCOPES["userinfo"], SCOPES["sendmessage"]])
     flow.redirect_uri = url_for('accounts.verify_send_message', provider=provider, _external=True)
 
     authorization_url, state = flow.authorization_url(
@@ -447,3 +449,23 @@ def scopes():
     print(response.json())
     flash(response.json(), "success")
     return redirect(url_for("main.home"))
+
+
+@accounts_bp.route("/delete_account", methods=["GET", "POST"])
+@login_required
+def delete_account():
+    print("Delete Account")
+    print(request)
+    if not current_user.is_authenticated:
+        return redirect(url_for('accounts.login'))
+    print(request)
+    if request.method == "POST":
+        user = User.query.get(int(current_user.id))
+        if user:
+            db.session.delete(user)
+            db.session.commit()
+            flash("Your account has been deleted.", "success")
+        else:
+            flash("User not found.", "danger")
+        return redirect(url_for("main.home"))
+    return render_template("account.html", title="Delete Account")

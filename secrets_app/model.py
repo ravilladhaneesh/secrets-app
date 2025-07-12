@@ -6,7 +6,6 @@ from sqlalchemy import PrimaryKeyConstraint
 from datetime import datetime
 from itsdangerous import URLSafeTimedSerializer as Serializer
 
-
 @login_manager.user_loader
 def user_loader(user_id):
     return User.query.get(int(user_id))

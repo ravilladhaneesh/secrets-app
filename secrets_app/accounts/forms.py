@@ -50,12 +50,12 @@ class UserLoginForm(FlaskForm):
 class UserUpdateForm(FlaskForm):
     firstName = StringField("firstName", validators=[DataRequired()])
     lastName = StringField("lastName")
-    required_login_per_days = IntegerField("Login Required Date", validators=[DataRequired()])
+    required_login_per_days = IntegerField("Login Required Days", validators=[DataRequired()])
     submit = SubmitField("Update")
 
     def validate_required_login_per_days(self, required_login_per_days):
         if not (5 <= required_login_per_days.data <= 30) :
-            raise ValidationError("Login Required Date should be greater than 5 days and less than 30 days")
+            raise ValidationError("Login Required Days should be greater than 5 days and less than 30 days")
         
 
 

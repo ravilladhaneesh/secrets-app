@@ -22,7 +22,7 @@
         {% if title %}
             {{ title }}
         {% else %}
-            Secrets
+            SecureThem - Your Personal Data Vault
         {% endif %}
     </title>
 </head>
@@ -40,7 +40,7 @@
     <!-- Navbar -->
     <header class="bg-white shadow-md sticky top-0 z-10">
         <nav class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="{{ url_for('main.home') }}" class="text-2xl font-bold text-indigo-700">Secrets</a>
+            <a href="{{ url_for('main.home') }}" class="text-2xl font-bold text-indigo-700">SecureThem</a>
             <div class="space-x-4">
                 {% if current_user.is_authenticated %}
                     <a href="{{ url_for('notes.notes') }}" class="text-gray-700 hover:text-indigo-600 font-medium">Notes</a>
