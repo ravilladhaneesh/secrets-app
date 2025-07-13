@@ -27,13 +27,14 @@ def notes():
             note_title = form.title.data
             note_content = form.content.data
             to_self = form.to_self.data
+            date = form.date.data
             receivers = []
             print("Form data:", form.data)
             for receiver in form.receivers.data:
                 receiver_obj = Receiver(name=receiver["name"], email_id=receiver["email_id"])
                 receivers.append(receiver_obj)
 
-            note = Note(title=note_title, content=note_content, to_self=to_self, receivers=receivers, user_id=int(userId))
+            note = Note(title=note_title, content=note_content, to_self=to_self, send_date=date, receivers=receivers, user_id=int(userId))
             db.session.add(note)
             db.session.commit()
             flash("New Note Added", "success")
@@ -69,6 +70,8 @@ def edit_note(noteId):
         print("hello")
         note.title = form.title.data
         note.content = form.content.data
+        note.to_self = form.to_self.data
+        note.send_date = form.date.data
         for i in note.receivers:
             db.session.delete(i)
 
@@ -89,7 +92,8 @@ def edit_note(noteId):
         form.title.data = note.title
         form.content.data = note.content
         form.to_self.data = note.to_self
-        
+        form.date.data = note.send_date
+
         for receiver in note.receivers:
             form.receivers.append_entry({
                 'name': receiver.name,

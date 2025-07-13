@@ -125,6 +125,48 @@ def send_scheduled_email(userName, to, secret, credentials):
   return send_message
 
 
+def send_scheduled_note_mail(userName, to, note, credentials):
+  try:
+    service = build("gmail", "v1", credentials=credentials)
+    message = EmailMessage()
+    html = f"""
+      <html>
+        <head></head>
+        <body>
+          <p>This is automated note mail sent from the securethem app by {userName}</p>
+          <h4>{note.title}</h4>
+          <p>{note.content}</p>
+        </body>
+      </html>
+
+    """
+
+    message.set_content(html, subtype='html')
+    message["To"] = to
+    message["Subject"] = "Automated Notes"
+
+    # encoded message
+    encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+
+    create_message = {"raw": encoded_message}
+    # pylint: disable=E1101
+    send_message = None
+    send_message = (
+        service.users()
+        .messages()
+        .send(userId="me", body=create_message)
+        .execute()
+    )
+    print(f"service: {service.users().messages()}")
+    print(f"Message {message['From']}")
+    print(f"Message {message['To']}")
+    # print(f'Message Id: {send_message["id"]}')
+  except HttpError as error:
+    print(f"An error occurred: {error}")
+    send_message = None
+  return send_message
+
+
 def send_reset_email(user):
     token = user.get_reset_token()
     rootUser = User.query.filter_by(email=current_app.config["ROOT_EMAIL"]).first()

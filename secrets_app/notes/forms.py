@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, FormField, FieldList, EmailField, ValidationError, BooleanField, TextAreaField
+from wtforms import StringField, SubmitField, FormField, FieldList, EmailField, ValidationError, BooleanField, TextAreaField, DateField
 from wtforms.validators import DataRequired
 
 
@@ -18,6 +18,7 @@ class AddNoteForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     content = TextAreaField("Content", validators=[DataRequired()])
     to_self = BooleanField("Self", default=True)
+    date = DateField('Pick a date', format='%Y-%m-%d', validators=[DataRequired()])
     receivers = FieldList(FormField(AddReceiverForm), min_entries=0)
     submit = SubmitField("Submit")
 

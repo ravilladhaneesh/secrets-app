@@ -20,6 +20,7 @@ class User(db.Model, UserMixin):
     is_oauth = db.Column(db.Boolean, nullable=False, default=False)
     key = db.Column(db.String(60), nullable=True)
     secrets = db.relationship('Secret', backref=backref('user', passive_deletes=True), lazy=True, cascade='all, delete')
+    notes = db.relationship('Note', backref=backref('user', passive_deletes=True), lazy=True, cascade='all, delete')
     last_login = db.Column(db.Date, nullable=False, default=datetime.now)
     is_verified = db.Column(db.Boolean, default=False, nullable=False)
     send_email_authorized = db.Column(db.Boolean, default=False)
@@ -84,7 +85,7 @@ class Note(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
     receivers = db.relationship('Receiver', backref=backref('notes', passive_deletes=True), lazy=True, cascade='all, delete')
     sent = db.Column(db.Boolean, default=False, nullable=False)
-    send_date = db.Column(db.DateTime, nullable=True)
+    send_date = db.Column(db.Date, nullable=True)
 
     def to_dict(self):
         return {
