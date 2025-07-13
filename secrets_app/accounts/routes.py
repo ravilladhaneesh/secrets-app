@@ -138,6 +138,7 @@ def login():
                 login_user(user, remember=False)
                 next = request.args.get("next")
                 flash(f'Logged In as {user.firstName}', 'success')
+                verification_alert_shown = True
                 if not user.is_oauth and not user.is_verified:
                     verification_alert_shown = False
                 return redirect(next) if next else redirect(url_for('main.home', verification_alert_shown=verification_alert_shown))
