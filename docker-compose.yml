@@ -18,6 +18,7 @@ services:
     container_name: nginx
     ports:
       - "8080:8080"
+      - "80:80"
     depends_on:
       - flask
     networks:
@@ -68,3 +69,5 @@ networks:
 
 volumes:
   db_volume:
+
+# uixie.porkbun.com
