@@ -19,3 +19,4 @@ itsdangerous
 gunicorn
 celery
 redis
+boto3
