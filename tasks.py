@@ -7,6 +7,12 @@ from secrets_app.accounts.routes import get_credentials_for_user
 from secrets_app.accounts.mail_service import send_scheduled_email, send_scheduled_note_mail
 from secrets_app.secrets.utils import decrypt_secret
 from celery.schedules import crontab
+import os
+import boto3
+from datetime import datetime
+
+import shutil
+
 
 
 flask_app = create_app()
@@ -21,6 +27,10 @@ celery_app.conf.beat_schedule = {
     'mail-every-morning': {
         'task': 'tasks.schedule_email',
         'schedule': crontab(hour=6, minute=00),
+    },
+    'backup-database-every-day': {
+        'task': 'tasks.backup_database',
+        'schedule': crontab(hour=1, minute=00),
     },
     # 'mail-every-evening': {
     #     'task': 'tasks.schedule_email',
@@ -42,10 +52,10 @@ celery_app.conf.beat_schedule = {
     #     'task': 'tasks.schedule_note_email',
     #     'schedule': crontab(minute='*/1')
     # },
-    'send-mail-30-seconds':{
-        'task': 'tasks.schedule_email',
-        'schedule': 30.0,
-    }
+    # 'send-mail-30-seconds':{
+    #     'task': 'tasks.schedule_email',
+    #     'schedule': 30.0,
+    # }
     
 }
 
@@ -104,3 +114,45 @@ def schedule_email():
 #         for user in users:
 #             if  user.send_email_authorized:
 #                     email_notification.delay(user.id)
+
+
+def copy_db_file(src, dest):
+    if os.path.exists(src):
+        shutil.copy(src, dest)
+        print(f"Database copied from {src} to {dest}")
+    else:
+        print(f"Source database file {src} does not exist.")
+
+
+@celery_app.task
+def backup_database():
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    backup_filename = f"/tmp/app_backup_{timestamp}.db"
+    
+    # Ensure the backup directory exists
+    os.makedirs(os.path.dirname(backup_filename), exist_ok=True)
+    # Path to the SQLite DB (adjust based on your app's path)
+    
+    db_path = os.getenv("DB_PATH", "/app/instance/site.db")
+    
+    if not os.path.exists(db_path):
+        print(f"Database file {db_path} does not exist. Skipping backup.")
+        return
+    
+    copy_db_file(db_path, backup_filename)
+    
+    
+    # Step 2: Upload the backup to S3 using Boto3
+    s3_client = boto3.client('s3')
+    s3_bucket = 'securethem-bucket'
+    s3_key = f"sqlite_backups/app_backup_{timestamp}.db"
+    
+    try:
+        # Upload the file to S3
+        s3_client.upload_file(backup_filename, s3_bucket, s3_key)
+        print(f"Backup successful: {s3_key}")
+    except Exception as e:
+        print(f"Backup failed: {e}")
+    
+    # Step 3: Clean up the local backup file
+    os.remove(backup_filename)
