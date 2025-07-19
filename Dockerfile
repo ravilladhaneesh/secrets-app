@@ -13,10 +13,15 @@ ENV PYTHONUNBUFFERED=1
 COPY requirements.txt .
 RUN python -m pip install -r requirements.txt
 
-RUN rm -f requirements.txt
 
 WORKDIR /app
 COPY . /app
+
+RUN rm -r /app/requirements.txt
+RUN rm -rf /app/.github/
+RUN rm -rf /app/nginx
+RUN rm -rf /app/.venv
+
 
 # Creates a non-root user with an explicit UID and adds permission to access the /app folder
 # For more info, please refer to https://aka.ms/vscode-docker-python-configure-containers
