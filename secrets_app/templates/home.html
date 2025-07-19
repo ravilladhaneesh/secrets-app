@@ -124,4 +124,22 @@
     </div>
 </section>
 
+<!-- Footer -->
+<footer class="bg-white border-t border-gray-200 mt-16">
+  <div class="max-w-6xl mx-auto px-6 py-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-600">
+    
+    <!-- Left Side -->
+    <div class="mb-4 md:mb-0">
+      <!-- &copy;  -->
+      <a href="mailto:support@securethem.com" class="hover:text-indigo-600">Contact Us</a>
+    </div>
+
+    <!-- Right Side -->
+    <div class="flex gap-4">
+      <a href="{{ url_for('main.privacy_policy') }}" class="hover:text-indigo-600">Privacy Policy</a>
+      <a href="{{ url_for('main.terms_and_conditions') }}" class="hover:text-indigo-600">Terms & Conditions</a>
+    </div>
+  </div>
+</footer>
+
 {% endblock content %}
