@@ -4,12 +4,14 @@ from secrets_app import create_app
 from secrets_app.model import User
 from datetime import date
 from secrets_app.accounts.routes import get_credentials_for_user
-from secrets_app.accounts.mail_service import send_scheduled_email, send_scheduled_note_mail
+from secrets_app.accounts.mail_service import send_scheduled_email
 from secrets_app.secrets.utils import decrypt_secret
 from celery.schedules import crontab
 import os
 import boto3
 from datetime import datetime
+
+from secrets_app.note_schedule import send_scheduled_note_mail
 
 import shutil
 
@@ -34,7 +36,7 @@ celery_app.conf.beat_schedule = {
     },
     # 'mail-every-evening': {
     #     'task': 'tasks.schedule_email',
-    #     'schedule': crontab(hour=18, minute=00),
+    #     'schedule': crontab(hour=17, minute=45),
     # },
     # 'mail-note-every-morning': {
     #     'task': 'tasks.schedule_note_email',
@@ -54,7 +56,7 @@ celery_app.conf.beat_schedule = {
     # },
     # 'send-mail-30-seconds':{
     #     'task': 'tasks.schedule_email',
-    #     'schedule': 30.0,
+    #     'schedule': crontab(minute='*/1')
     # }
     
 }
