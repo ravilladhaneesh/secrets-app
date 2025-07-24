@@ -94,7 +94,6 @@ def secrets():
         if form.validate_on_submit():
             for nominee in form.nominees:
                 print(nominee)
-            print("hello")
             secret_name = encrypt_secret(form.name.data, user.secret_salt)
             secret_value = encrypt_secret(form.secret.data, user.secret_salt)
             nominees = []

@@ -82,7 +82,7 @@ function showNoteDetails(note) {
 // Close the note details popup
 function closeNotesPopup() {
     document.getElementById('note-overlay').style.display = 'none';
-    document.getElementById('details-popup').style.display = 'none';
+    document.getElementById('notes-details-popup').style.display = 'none';
     document.getElementById('del-note-consent').style.display = 'none';
 }
 
