@@ -5,7 +5,7 @@ import google.auth
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from flask import url_for, current_app
+from flask import url_for, current_app, render_template
 from secrets_app.model import User
 
 
@@ -88,20 +88,10 @@ def send_scheduled_email(userName, to, secret, credentials):
   try:
     service = build("gmail", "v1", credentials=credentials)
     message = EmailMessage()
-    html = f"""
-      <html>
-        <head></head>
-        <body>
-          <p>This is automated secrets mail sent from the secrets app by {userName}</p>
-          <h4>{secret.fieldName}</h4>
-          <p>{secret.fieldSecret}</p>
-        </body>
-      </html>
-
-    """
+    html = render_template("secret_mail_template.html", secret_content=secret.fieldSecret)
     message.set_content(html, subtype='html')
     message["To"] = to
-    message["Subject"] = "Automated Secrets"
+    message["Subject"] = f"Automated Message - {secret.fieldName}"
 
     # encoded message
     encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
