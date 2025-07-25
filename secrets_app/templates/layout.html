@@ -38,22 +38,52 @@
 
 
     <!-- Navbar -->
-    <header class="bg-white shadow-md sticky top-0 z-10">
-        <nav class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="{{ url_for('main.home') }}" class="text-2xl font-bold text-indigo-700">SecureThem</a>
-            <div class="space-x-4">
-                {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('notes.notes') }}" class="text-gray-700 hover:text-indigo-600 font-medium">Notes</a>
-                    <a href="{{ url_for('secrets.secrets') }}" class="text-gray-700 hover:text-indigo-600 font-medium">Secrets</a>
-                    <a href="{{ url_for('accounts.account') }}" class="text-gray-700 hover:text-indigo-600 font-medium">Account</a>
-                    <a href="{{ url_for('accounts.logout') }}" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md">Logout</a>
-                {% else %}
-                    <a href="{{ url_for('accounts.login') }}" class="text-gray-700 hover:text-indigo-600 font-medium">Login</a>
-                    <a href="{{ url_for('accounts.register') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md">Register</a>
-                {% endif %}
-            </div>
-        </nav>
-    </header>
+        <header class="bg-white shadow-md sticky top-0 z-10">
+  <nav class="max-w-7xl mx-auto">
+    <div class="flex justify-between items-center h-16">
+      <!-- Logo -->
+      <a href="{{ url_for('main.home') }}" class="text-2xl font-bold text-indigo-700">SecureThem</a>
+
+      <!-- Hamburger Button (visible on small screens) -->
+      <div class="md:hidden">
+        <button id="navbar-toggle" type="button" class="text-gray-600 hover:text-indigo-700 focus:outline-none">
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Desktop Nav Links -->
+      <div class="hidden md:flex space-x-4 items-center">
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('notes.notes') }}" class="text-gray-700 hover:text-indigo-600 font-medium">Notes</a>
+          <a href="{{ url_for('secrets.secrets') }}" class="text-gray-700 hover:text-indigo-600 font-medium">Secrets</a>
+          <a href="{{ url_for('accounts.account') }}" class="text-gray-700 hover:text-indigo-600 font-medium">Account</a>
+          <a href="{{ url_for('accounts.logout') }}" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md">Logout</a>
+        {% else %}
+          <a href="{{ url_for('accounts.login') }}" class="text-gray-700 hover:text-indigo-600 font-medium">Login</a>
+          <a href="{{ url_for('accounts.register') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md">Register</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Mobile Menu Links (toggle) -->
+    <div id="mobile-menu" class="hidden md:hidden mt-2 space-y-2">
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('notes.notes') }}" class="block text-gray-700 hover:text-indigo-600 font-medium">Notes</a>
+        <a href="{{ url_for('secrets.secrets') }}" class="block text-gray-700 hover:text-indigo-600 font-medium">Secrets</a>
+        <a href="{{ url_for('accounts.account') }}" class="block text-gray-700 hover:text-indigo-600 font-medium">Account</a>
+<a href="{{ url_for('accounts.logout') }}" class="inline-block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md">Logout</a>
+      {% else %}
+        <a href="{{ url_for('accounts.login') }}" class="block text-gray-700 hover:text-indigo-600 font-medium">Login</a>
+<a href="{{ url_for('accounts.register') }}" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md">Register</a>
+      {% endif %}
+    </div>
+  </nav>
+</header>
+
+
 
     <!-- Flash Messages -->
     <main role="main" class="px-4 py-6 max-w-4xl mx-auto">
@@ -80,6 +110,13 @@
     <script src="{{ url_for('static', filename='buildHTML.js')}}"></script>
     <script src="{{ url_for('static', filename='buildSecrets.js')}}"></script>
     <script src="{{ url_for('static', filename='buildNotes.js')}}"></script>
+    <script>
+        document.getElementById('navbar-toggle').addEventListener('click', function () {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        });
+    </script>
+
     {% block bootstrap %}
     {% endblock bootstrap%}
 
