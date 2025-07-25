@@ -21,15 +21,12 @@ def notes():
     
     if request.method == "POST":
         if form.validate_on_submit():
-            for receiver in form.receivers:
-                print(receiver)
-            print("hello")
+            
             note_title = form.title.data
             note_content = form.content.data
             to_self = form.to_self.data
             date = form.date.data
             receivers = []
-            print("Form data:", form.data)
             for receiver in form.receivers.data:
                 receiver_obj = Receiver(name=receiver["name"], email_id=receiver["email_id"])
                 receivers.append(receiver_obj)
@@ -46,7 +43,6 @@ def notes():
             return redirect(url_for('notes.notes'))
     
     # Fetch user's notes
-    print("Fetching notes for user:", userId)
     notes = Note.query.filter_by(user_id=int(userId)).all()
     notes_dict = [note.to_dict() for note in notes]
     
@@ -63,11 +59,10 @@ def edit_note(noteId):
     user = User.query.get(int(userId))
     note = Note.query.get_or_404(noteId)
     if note.user_id != user.id:
-        flash("You do not have permission to edit this secret", "danger")
+        flash("You do not have permission to edit this note", "danger")
         return redirect(url_for('notes.notes'))
     form = AddNoteForm()
     if form.validate_on_submit():
-        print("hello")
         note.title = form.title.data
         note.content = form.content.data
         note.to_self = form.to_self.data
@@ -82,7 +77,6 @@ def edit_note(noteId):
             )
             db.session.add(new_receiver)
             note.receivers.append(new_receiver)
-        print("\n\n\n\n\n")
 
         db.session.add(note)
         db.session.commit()
@@ -100,7 +94,6 @@ def edit_note(noteId):
                 'email_id': receiver.email_id
             })
         
-    print("Form data:", form.data)
     return render_template('edit_note.html', form=form, note=note, title="Edit Note")
 
 
