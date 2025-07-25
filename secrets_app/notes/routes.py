@@ -63,7 +63,7 @@ def edit_note(noteId):
     user = User.query.get(int(userId))
     note = Note.query.get_or_404(noteId)
     if note.user_id != user.id:
-        flash("You do not have permission to edit this secret", "danger")
+        flash("You do not have permission to edit this note", "danger")
         return redirect(url_for('notes.notes'))
     form = AddNoteForm()
     if form.validate_on_submit():
