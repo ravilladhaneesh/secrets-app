@@ -1,0 +1,51 @@
+name: Publish Repo Data
+
+on:
+  push:
+    branches:
+      - master  # Run the workflow when code is pushed to the main branch.(Enter your branch name here)
+
+jobs:
+  run-python-script:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Clone github-data-processor repo
+      - name: Clone github-data-processor repository
+        run: git clone https://github.com/ravilladhaneesh/github-data-processor.git
+
+      # Step 3: Configure aws credentials
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::680543266869:role/repo-manager-put-data-role
+          aws-region: ap-south-1
+          
+      # Step 4: Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'  # Set Python version (e.g., 3.8, 3.9)
+
+      # Step 5: Set repository name as environment variable
+      - name: Set ENV variable with repository name
+        run: |
+          echo "REPO_NAME=${{ github.repository }}" >> $GITHUB_ENV
+          echo "REPO_PATH=${{ github.workspace }}" >> $GITHUB_ENV
+          echo "REPO_URL=https://github.com/${{ github.repository }}" >> $GITHUB_ENV
+          echo "BRANCH=${{ github.ref_name}}" >> $GITHUB_ENV
+          echo "REPO_VISIBILITY=${{ github.event.repository.private }}" >> $GITHUB_ENV
+
+      # Step 6: Run the github-data-processor project
+      - name: Run scraper
+        env:
+          ROLE_ARN: arn:aws:iam::680543266869:role/repo-manager-put-data-role
+        run: |
+          pip install -r github-data-processor/requirements.txt
+          python github-data-processor/src/main.py  # run the github-data-processor project
