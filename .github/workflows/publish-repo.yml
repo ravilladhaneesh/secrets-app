@@ -6,7 +6,7 @@ on:
       - master  # Run the workflow when code is pushed to the main branch.(Enter your branch name here)
 
 jobs:
-  run-python-script:
+  publish-repo:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
